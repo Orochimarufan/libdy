@@ -1,0 +1,27 @@
+# WAF buildscript
+# :vim set ft=python
+
+headers = ()
+public_headers = "dypp.h",
+sources = "dypp.cpp",
+
+def options(opt):
+    opt.load("compiler_cxx")
+
+
+def configure(cnf):
+    cnf.load("compiler_cxx")
+
+    cnf.write_config_header("config.h")
+
+
+def build(bld):
+    bld.shlib(
+    	source=sources,
+    	target="dypp",
+
+    	includes=[".", ".."],
+    	defines=["__LIBDYPP_LIBRARY"],
+    	cxxflags=["-std=c++11"],
+    	use="dy"
+    )

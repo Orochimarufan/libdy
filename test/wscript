@@ -1,0 +1,38 @@
+# WAF buildscript
+# :vim set ft=python
+
+def options(opt):
+    opt.load("compiler_c")
+    opt.load("compiler_cxx")
+    opt.load("c")
+    opt.load("cxx")
+
+
+def configure(cnf):
+    cnf.load("compiler_c")
+    cnf.load("compiler_cxx")
+    cnf.load("c")
+    cnf.load("cxx")
+
+
+def build(bld):
+    bld.program(
+    	features="c cprogram",
+        source="main.c",
+        target="testdy",
+
+        includes=[".."],
+        #defines=["__LIBDY_LIBRARY"],
+        cflags=["-std=c11"],
+        use="dy"
+    )
+    
+    bld.program(
+        features="cxx cxxprogram",
+        source="main.cpp",
+        target="testdypp",
+        
+        includes=[".."],
+        cxxflags=["-std=c++11"],
+        use="dypp",
+    )

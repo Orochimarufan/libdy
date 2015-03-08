@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="libdy" Database="/home/HOME/taeyeon/Development/libdy/.codelite/libdy.tags">
+  <Project Name="libdy" Path="libdy/libdy.project" Active="No"/>
+  <Project Name="meta" Path="meta.project"/>
+  <Project Name="test" Path="test/test.project" Active="Yes"/>
+  <Project Name="libdypp" Path="libdypp/libdypp.project"/>
+  <Project Name="pydy" Path="pydy/pydy.project"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Project Name="libdy" ConfigName="Debug"/>
+      <Project Name="meta" ConfigName="Debug"/>
+      <Project Name="test" ConfigName="Debug"/>
+      <Project Name="libdypp" ConfigName="Debug"/>
+      <Project Name="pydy" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Project Name="libdy" ConfigName="Release"/>
+      <Project Name="meta" ConfigName="Debug"/>
+      <Project Name="test" ConfigName="Release"/>
+      <Project Name="libdypp" ConfigName="Release"/>
+      <Project Name="pydy" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

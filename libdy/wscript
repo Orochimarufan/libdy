@@ -1,0 +1,26 @@
+# WAF buildscript
+# :vim set ft=python
+
+headers = "dy_p.h", "hash_p.h", "dict_p.h", "string_p.h", "freelist_p.h", "callable_p.h"
+public_headers = "dy.h", "dy_error.h", "dy_string.h", "dy_host.h", "dy_callable.h"
+sources = "host.c", "hash.c", "string.c", "dict.c", "dy.c", "error.c", "list.c", "freelist.c", "string_intern.c", "callable.c"
+
+def options(opt):
+    opt.load("compiler_c")
+
+
+def configure(cnf):
+    cnf.load("compiler_c")
+
+    cnf.write_config_header("config.h")
+
+
+def build(bld):
+    bld.shlib(
+    	source=sources,
+    	target="dy",
+
+    	includes=["."],
+    	defines=["__LIBDY_LIBRARY"],
+    	cflags=["-std=c11"]
+    )

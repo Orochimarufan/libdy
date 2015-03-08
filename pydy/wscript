@@ -1,0 +1,22 @@
+# WAF buildscript
+# :vim set ft=python
+
+sources = "pydy.c", 
+
+def options(opt):
+    opt.load("compiler_c python")
+
+def configure(cnf):
+    cnf.load("compiler_c python")
+    cnf.check_python_version((3,3))
+    cnf.check_python_headers()
+
+def build(bld):
+    bld.shlib(
+    	features="pyext",
+    	source=sources,
+    	target="pydy",
+    	
+    	use="dy",
+    	includes=".."
+    )

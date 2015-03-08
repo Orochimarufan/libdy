@@ -1,0 +1,8 @@
+/build
+*~
+*.mk
+Makefile
+/.codelite
+.lock-*
+__pycache__
+
