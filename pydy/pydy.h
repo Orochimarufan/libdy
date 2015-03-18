@@ -26,6 +26,7 @@
  * NOTE: This header is for use in embedded python interpreters.
  *       you should link your application against pydy directly and
  *       call PyInit_pydy() manually, after Py_Initialize().
+ * The public function use the libdy Exception system, except PyInit.
  */
 
 #ifdef __cplusplus

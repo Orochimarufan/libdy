@@ -111,12 +111,16 @@ double DyFloat_Get(DyObject *self)
 // Misc
 DyObject *Dy_Retain(DyObject *self)
 {
+    //if (Dy_Type(self) != DY_STRING)
+    //    printf("Retain %s %d\n", Dy_AsRepr(self), self->refcnt);
     ++self->refcnt;
     return self;
 }
 
 void Dy_Release(DyObject *self)
 {
+    //if (Dy_Type(self) != DY_STRING)
+    //    printf("Release %s\n", Dy_AsRepr(self));
     if (!--self->refcnt)
         Dy_FreeObject(self);
 }
@@ -134,9 +138,8 @@ void Dy_FreeObject(DyObject *o)
     if (!level)
     {
         ++level;
-        //DyObject *s = Dy_Repr(o);
-        //printf("Free %s object at %p\n", Dy_GetTypeName(o->type), o);//DyString_AsString(s));
-        //Dy_Release(s);
+        //printf("Free %s\n", Dy_AsRepr(o));
+        //printf("Free %s object at %p\n", Dy_GetTypeName(o->type), o);
         --level;
     }
 
@@ -146,6 +149,8 @@ void Dy_FreeObject(DyObject *o)
         dict_destroy((DyDictObject*) o);
     else if (o->type == DY_LIST)
     	list_destroy((DyListObject *) o);
+    else if (o->type == DY_EXCEPTION)
+        exception_destroy(o);
 
     free(o);
 }

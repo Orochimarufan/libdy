@@ -92,15 +92,23 @@ DyObject *DyErr_SetObject(DyObject *exception)
 {
     DyErr_CheckArg("DyErr_SetObject", 1, DY_EXCEPTION, exception);
     ((DyExceptionObject *)exception)->cause = dy_error_state;
-    dy_error_state = exception;
+    dy_error_state = Dy_Retain(exception);
     return exception;
 }
 
 DyObject *DyErr_DiscardAndSetObject(DyObject *exception)
 {
     DyErr_CheckArg("DyErr_DiscardAndSetObject", 1, DY_EXCEPTION, exception);
-    dy_error_state = exception;
+    if (dy_error_state)
+        Dy_Release(dy_error_state);
+    dy_error_state = Dy_Retain(exception);
     return exception;
+}
+
+void exception_destroy(DyObject *exc)
+{
+    if (((DyExceptionObject*)exc)->cause)
+        Dy_Release(((DyExceptionObject*)exc)->cause);
 }
 
 // Argument checking

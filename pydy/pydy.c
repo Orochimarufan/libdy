@@ -19,6 +19,7 @@
 #include <Python.h>
 #include <libdy/dy.h>
 #include <libdy/dy_error.h>
+#include "pydy.h"
 
 static PyObject *DyError;
 
@@ -344,8 +345,59 @@ static PyObject *PyDy_Pass(DyObject *dyobj)
 
 static void raise_dy_error()
 {
-    PyErr_SetString(DyError, "Dy error");
+    DyObject *dy_exc = DyErr_Occurred();
+    if (!dy_exc)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "pydy: raise_dy_error called without active exception!");
+        return;
+    }
+
+    PyObject *exc = PyDy_New(dy_exc);
+    if (!exc)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "pydy: raise_dy_error failed to wrap exception object!");
+        return;
+    }
+
+    PyErr_SetObject(DyError, exc);
+
+    Py_DECREF(exc);
+
     DyErr_Clear();
+}
+
+static void raise_python_error_in_dy()
+{
+    PyObject *exc = PyErr_Occurred();
+    Py_INCREF(exc);
+
+    if (PyObject_IsInstance(exc, DyError))
+    {
+        PyObject *args = PyObject_GetAttrString(exc, "args");
+        if (args)
+        {
+            PyObject *dyerrx = PySequence_GetItem(args, 1);
+            if (dyerrx)
+            {
+                DyObject *dyerr = PyDy_Get(dyerrx);
+                if (dyerr)
+                {
+                    Py_DECREF(exc);
+                    DyErr_SetObject(dyerr);
+                    PyErr_Clear();
+                    return;
+                }
+            }
+        }
+    }
+
+    PyObject *str = PyObject_Str(exc);
+    if (str)
+        DyErr_Format("py.Exception", "Python exception: %s", PyUnicode_AsUTF8(str));
+    else
+        DyErr_Set("py.Exception", "Python exception.");
+    Py_DECREF(exc);
+    PyErr_Clear();
 }
 
 // Conversion
@@ -550,6 +602,37 @@ static PyObject *dylong2pylong(DyObject *lng)
 static PyObject *dyfloat2pyfloat(DyObject *flt)
 {
     return PyFloat_FromDouble(DyFloat_Get(flt));
+}
+
+// Public
+DyObject *PyDy_FromPython(PyObject *o)
+{
+    DyObject *obj = py2dy(o);
+    if (!obj)
+        raise_python_error_in_dy();
+    return obj;
+}
+
+DyObject *PyDy_StealFromPython(PyObject *o)
+{
+    DyObject *obj = PyDy_FromPython(o);
+    Py_DECREF(o);
+    return obj;
+}
+
+PyObject *PyDy_WrapObject(DyObject *obj)
+{
+    PyObject *o = PyDy_New(obj);
+    if (!o)
+        raise_python_error_in_dy();
+    return o;
+}
+
+PyObject *PyDy_StealObject(DyObject *obj)
+{
+    PyObject *o = PyDy_FromPython(obj);
+    Dy_Release(obj);
+    return o;
 }
 
 // Module Definition

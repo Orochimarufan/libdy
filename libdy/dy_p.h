@@ -44,3 +44,6 @@ struct _DyObject {
 void Dy_InitObject(DyObject *, DyObject_Type);
 void Dy_FreeObject(DyObject *);
 bool Dy_HashEx(DyObject *, Dy_hash_t *);
+
+// cause it doesn't go anywhere else either
+void exception_destroy(DyObject *exc);
