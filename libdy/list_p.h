@@ -36,5 +36,5 @@ void list_destroy(DyListObject *self);
 
 DyObject *list_getitem(DyListObject *self, ssize_t key);
 DyObject *list_getitemu(DyListObject *self, ssize_t key);
-int list_setitem(DyListObject *self, ssize_t key, DyObject *value);
+bool list_setitem(DyListObject *self, ssize_t key, DyObject *value);
 DyObject *list_repr(DyListObject *self);

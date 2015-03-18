@@ -112,22 +112,23 @@ DyObject *Dy_GetItemLongU(DyObject *self, long key);
  * @param self The object
  * @param key The key
  * @param value the new value
- * @return NULL on success, an Exception otherwise
+ * @return 
  * If value is NULL, delete the key instead
  */
-int       Dy_SetItem(DyObject *self, DyObject *key, DyObject *value);
-int       Dy_SetItemString(DyObject *self, const char *key, DyObject *value);
-int       Dy_SetItemLong(DyObject *self, long key, DyObject *value);
+bool      Dy_SetItem(DyObject *self, DyObject *key, DyObject *value);
+bool      Dy_SetItemString(DyObject *self, const char *key, DyObject *value);
+bool      Dy_SetItemLong(DyObject *self, long key, DyObject *value);
 
 /**
  * @brief Check if an object/list contains a specific item
  * @param self The object
  * @param key The key
  * @return whether \c key exists in \c self
+ * NOTIMPLEMENTED
  */
-int       Dy_Contains(DyObject *self, DyObject *key);
-int       Dy_ContainsString(DyObject *self, const char *key);
-int       Dy_ContainsLong(DyObject *self, long key);
+bool      Dy_Contains(DyObject *self, DyObject *key);
+bool      Dy_ContainsString(DyObject *self, const char *key);
+bool      Dy_ContainsLong(DyObject *self, long key);
 
 
 // ----------------------------------------------------------------------------
@@ -204,7 +205,7 @@ inline bool DyDict_Check(DyObject *obj)
 DyObject *DyDict_New();
 DyObject *DyDict_NewWithParent(DyObject *parent);
 
-int    	  DyDict_Clear(DyObject *self);
+bool   	  DyDict_Clear(DyObject *self);
 
 
 // ----------------------------------------------------------------------------
@@ -216,9 +217,9 @@ DyObject *DyList_New();
 DyObject *DyList_NewEx(size_t preallocate);
 
 // These don't steal the refs!
-int       DyList_Clear(DyObject *self);
-int    	  DyList_Insert(DyObject *self, ssize_t where, DyObject *value);
-int       DyList_Append(DyObject *self, DyObject *value);
+bool      DyList_Clear(DyObject *self);
+bool   	  DyList_Insert(DyObject *self, ssize_t where, DyObject *value);
+bool      DyList_Append(DyObject *self, DyObject *value);
 
 
 // ----------------------------------------------------------------------------
@@ -236,7 +237,6 @@ inline bool DyString_Check(DyObject *obj)
  * @param data The character data
  * @param size The string size
  * @return New reference to a string object
- * NOTE: The string is interned if it has less than 11 characters.
  * @sa dy_string.h
  * @sa DyString_InternStringFromStringAndSize
  */
@@ -246,7 +246,6 @@ DyObject *DyString_FromStringAndSize(const char *data, size_t size);
  * @brief Create a string object from a NTBS
  * @param cstr The null-terminated C string
  * @return New reference to a string object
- * NOTE: Interning as in DyString_FromStringAndSize
  * @sa DyString_FromStringAndSize
  * @sa DyString_InternStringFromString
  */

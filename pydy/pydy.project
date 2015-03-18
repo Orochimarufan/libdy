@@ -95,4 +95,7 @@
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="include">
+    <File Name="pydy.h"/>
+  </VirtualDirectory>
 </CodeLite_Project>

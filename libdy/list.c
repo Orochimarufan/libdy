@@ -21,6 +21,9 @@
 
 #include <assert.h>
 
+// Inlines
+bool DyList_Check(DyObject *);
+
 // Modeled after cpython/Objects/listobject.c
 DyObject *DyList_New()
 {
@@ -99,7 +102,7 @@ DyObject *list_getitemu(DyListObject *self, ssize_t key)
     return self->items[key];
 }
 
-int list_setitem(DyListObject *self, ssize_t key, DyObject *value)
+bool list_setitem(DyListObject *self, ssize_t key, DyObject *value)
 {
     size_t size = self->size;
     DyObject *olditem;
@@ -111,7 +114,7 @@ int list_setitem(DyListObject *self, ssize_t key, DyObject *value)
     if (key < 0 || key >= size)
     {
     	DyErr_Set(DY_ERRID_INDEX_ERROR, "List assignment out of range");
-    	return -1;
+    	return false;
     }
     
     p = self->items + key;
@@ -119,16 +122,16 @@ int list_setitem(DyListObject *self, ssize_t key, DyObject *value)
     *p = Dy_Retain(value);
     Dy_Release(olditem);
     
-    return 0;
+    return true;
 }
 
-inline static int list_insert(DyListObject *self, ssize_t where, DyObject *value)
+inline static bool list_insert(DyListObject *self, ssize_t where, DyObject *value)
 {
     ssize_t n = self->size;
     
     // Resize list
     if (list_resize(self, n + 1) == -1)
-    	return -1;
+    	return false;
     
     // Check bounds
     if (where < 0)
@@ -147,32 +150,32 @@ inline static int list_insert(DyListObject *self, ssize_t where, DyObject *value
     	items[i+1] = items[i];
     Dy_Retain(value);
     items[where] = value;
-    return 0;
+    return true;
 }
 
-int DyList_Insert(DyObject *self, ssize_t where, DyObject *value)
+bool DyList_Insert(DyObject *self, ssize_t where, DyObject *value)
 {
     if (DyErr_CheckArg("DyList_Insert", 0, DY_LIST, self))
-    	return -1;
+    	return false;
     
     return list_insert((DyListObject *)self, where, value);
 }
 
-inline static int list_append(DyListObject *self, DyObject *value)
+inline static bool list_append(DyListObject *self, DyObject *value)
 {
     size_t n = self->size;
 
     if (list_resize(self, n + 1) == -1)
-    	return -1;
+    	return false;
     
     self->items[n] = Dy_Retain(value);
-    return 0;
+    return true;
 }
 
-int DyList_Append(DyObject *self, DyObject *value)
+bool DyList_Append(DyObject *self, DyObject *value)
 {
     if (DyErr_CheckArg("DyList_Append", 0, DY_LIST, self))
-    	return -1;
+    	return false;
     
     return list_append((DyListObject *)self, value);
 }
@@ -191,7 +194,7 @@ void list_destroy(DyListObject *self)
 
 DyObject *list_repr(DyListObject *self)
 {
-    char buffer[DY_LIST_REPR_BUFFER] = { '[', 0 };
+    char buffer[DY_LIST_REPR_BUFFER + 5] = { '[', 0 };
     size_t pos = 1;
     
     for (size_t i = 0; i < self->size && pos < DY_LIST_REPR_BUFFER ; ++i)
@@ -200,18 +203,23 @@ DyObject *list_repr(DyListObject *self)
     	strncpy(buffer + pos, DyString_AsString(repr), DY_LIST_REPR_BUFFER - pos);
     	pos += Dy_Length(repr);
     	Dy_Release(repr);
+        buffer[pos++] = ',';
+        buffer[pos++] = ' ';
     }
+
+    if (self->size > 0)
+        pos -= 2;
     
-    if (pos < DY_LIST_REPR_BUFFER)
-    	memcpy(buffer + pos++, "]", 2);
+    buffer[pos++] = ']';
+    buffer[pos++] = 0;
 
     return DyString_FromStringAndSize(buffer, pos);
 }
 
-int DyList_Clear(DyObject *self)
+bool DyList_Clear(DyObject *self)
 {
     if (DyErr_CheckArg("DyList_Clear", 0, DY_LIST, self))
-    	return -1;
+    	return false;
 
     if (((DyListObject *)self)->items != NULL)
     {
@@ -221,5 +229,5 @@ int DyList_Clear(DyObject *self)
     	((DyListObject *)self)->items = NULL;
     	((DyListObject *)self)->size = 0;
     }
-    return 0;
+    return true;
 }

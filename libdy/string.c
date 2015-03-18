@@ -50,8 +50,8 @@ DyStringObject *string_new(const char *s, size_t size)
 
 DyObject *DyString_FromStringAndSize(const char *data, size_t size)
 {
-    if (size < 16)
-        return DyString_InternStringFromStringAndSize(data, size);
+    //if (size < 16)
+    //    return DyString_InternStringFromStringAndSize(data, size);
     return (DyObject *)string_new(data, size);
 }
 

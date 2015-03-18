@@ -23,6 +23,9 @@
 #include <assert.h>
 
 
+// Inlines
+bool DyCallable_Check(DyObject *);
+
 // Create
 DyObject *DyCall_CreateNoArg(DyNoArgFn fn)
 {

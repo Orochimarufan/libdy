@@ -18,5 +18,6 @@ def build(bld):
     	target="pydy",
     	
     	use="dy",
-    	includes=".."
+    	includes="..",
+        cflags=["-std=c11"]
     )

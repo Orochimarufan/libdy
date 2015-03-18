@@ -368,7 +368,7 @@ DyObject *Dy_GetItemU(DyObject *self, DyObject *key)
     }
 }
 
-int Dy_SetItem(DyObject *self, DyObject *key, DyObject *value)
+bool Dy_SetItem(DyObject *self, DyObject *key, DyObject *value)
 {
     switch (self->type)
     {
@@ -378,43 +378,43 @@ int Dy_SetItem(DyObject *self, DyObject *key, DyObject *value)
     	if (key->type != DY_LONG)
     	{
     		TE__listindex(Dy_GetTypeName(Dy_Type(key)));
-    		return -1;
+    		return false;
     	}
     	return list_setitem((DyListObject *) self, DyLong_Get(key), value);
     default:
     	TE__notsubscriptable(self);
-    	return -1;
+    	return false;
     }
 }
 
-int Dy_SetItemString(DyObject *self, const char *key, DyObject *value)
+bool Dy_SetItemString(DyObject *self, const char *key, DyObject *value)
 {
     switch (self->type)
     {
     case DY_DICT:
     {
     	DyObject *k = DyString_InternStringFromString(key);
-    	int r = dict_setitem((DyDictObject *)self, k, value);
+    	bool r = dict_setitem((DyDictObject *)self, k, value);
     	Dy_Release(k);
     	return r;
     }
     case DY_LIST:
     	TE__listindex(key);
-    	return -1;
+    	return false;
     default:
     	TE__notsubscriptable(self);
-    	return -1;
+    	return false;
     }
 }
 
-int Dy_SetItemLong(DyObject *self, long key, DyObject *value)
+bool Dy_SetItemLong(DyObject *self, long key, DyObject *value)
 {
     switch (self->type)
     {
     	case DY_DICT:
     	{
     		DyObject *k = DyLong_New(key);
-    		int r = dict_setitem((DyDictObject *)self, k, value);
+    		bool r = dict_setitem((DyDictObject *)self, k, value);
     		Dy_Release(k);
     		return r;
     	}
@@ -422,7 +422,7 @@ int Dy_SetItemLong(DyObject *self, long key, DyObject *value)
     		return list_setitem((DyListObject *)self, key, value);
     	default:
     		TE__notsubscriptable(self);
-    		return -1;
+    		return false;
     }
 }
 

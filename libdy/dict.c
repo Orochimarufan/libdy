@@ -60,7 +60,7 @@ DyObject *DyDict_NewWithParent(DyObject *parent)
     return (DyObject *)self;
 }
 
-int dict_clean(DyDictObject *self)
+bool dict_clean(DyDictObject *self)
 {
     // Release items
     for (int i = 0; i < DY_TABLE_SIZE; ++i)
@@ -86,7 +86,18 @@ int dict_clean(DyDictObject *self)
         free(last);
     }
     
-    return 0;
+    return true;
+}
+
+bool DyDict_Clear(DyObject *self)
+{
+    if (!DyDict_Check(self))
+    {
+        DyErr_SetArgumentTypeError("DyDict_Clear", 0, "Dict", Dy_GetTypeName(Dy_Type(self)));
+        return false;
+    }
+
+    return dict_clean((DyDictObject*)self);
 }
 
 void dict_destroy(DyDictObject *o)
@@ -233,7 +244,7 @@ static inline void __KeyError(DyObject *key)
     Dy_Release(kr);
 }
 
-int dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
+bool dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
 {
     bucket_t *b;
     Dy_hash_t hash;
@@ -241,7 +252,7 @@ int dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
     if (!Dy_HashEx(key, &hash))
     {
         TE__unhashable(key);
-        return -1;
+        return false;
     }
     
     // Delete
@@ -249,7 +260,7 @@ int dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
     {
     	find_and_remove_bucket(o, key, hash);
     	
-    	return 0;
+    	return true;
     }
 
     // Set
@@ -273,11 +284,11 @@ int dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
     	b->key = key;
     	b->value = value;
     	
-    	return 0;
+    	return true;
     }
 }
 
-int dict_contains(DyDictObject *o, DyObject *key)
+bool dict_contains(DyDictObject *o, DyObject *key)
 {
     Dy_hash_t hash;
     return Dy_HashEx(key, &hash) && (find_bucket(o, key, hash) != NULL || (o->parent && dict_contains(o->parent, key)));

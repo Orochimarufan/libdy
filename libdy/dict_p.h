@@ -59,7 +59,7 @@ typedef struct _DyDictObject {
 
 // Prototypes
 void dict_destroy(DyDictObject *self);
-int dict_clean(DyDictObject *self);
+bool dict_clean(DyDictObject *self);
 DyObject *dict_repr(DyDictObject *self);
 
 DyObject *dict_get(DyDictObject *o, DyObject *key, Dy_hash_t hash);
@@ -67,4 +67,4 @@ DyObject *dict_get(DyDictObject *o, DyObject *key, Dy_hash_t hash);
 DyObject *dict_getitem(DyDictObject *self, DyObject *key);
 DyObject *dict_getitemu(DyDictObject *self, DyObject *key);
 
-int dict_setitem(DyDictObject *self, DyObject *key, DyObject *value);
+bool dict_setitem(DyDictObject *self, DyObject *key, DyObject *value);
