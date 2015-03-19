@@ -37,6 +37,8 @@
     <File Name="string_intern.c"/>
     <File Name="callable_p.h"/>
     <File Name="callable.c"/>
+    <File Name="json.c"/>
+    <File Name="json_p.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="dy.h"/>

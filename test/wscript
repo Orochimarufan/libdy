@@ -36,3 +36,13 @@ def build(bld):
         cxxflags=["-std=c++11"],
         use="dypp",
     )
+
+    bld.program(
+        features="c cprogram",
+        source="test_json.c",
+        target="test_json",
+
+        includes=[".."],
+        cflags=["-std=c11"],
+        use="dy",
+    )
