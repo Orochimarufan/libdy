@@ -118,7 +118,7 @@ static bool token_space(token *token)
     token->type = TOKEN_SPACE;
     while (true)
     {
-        if (*token->end == ' ' || *token->end == '\n')
+        if (*token->end == ' ' || *token->end == '\t')
             token->end_location.column++;
         else if (*token->end == '\n')
         {
