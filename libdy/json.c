@@ -22,13 +22,12 @@
 #include <math.h>
 #include <string.h>
 
-
-bool first_token(token *token, const char *data, const char *filename)
+void init_token(token *token, const char *data, const char *filename)
 {
-    return first_token_ex(token, data, filename, 0, 1, 1);
+    init_token_ex(token, data, filename, 0, 1, 1);
 }
 
-bool first_token_ex(token *token, const char *data, const char *filename, size_t offset, size_t line, size_t column)
+void init_token_ex(token *token, const char *data, const char *filename, size_t offset, size_t line, size_t column)
 {
     // Initialize token
     token->type = TOKEN_EOF;
@@ -39,6 +38,16 @@ bool first_token_ex(token *token, const char *data, const char *filename, size_t
     token->end_location.line = line;
     token->end_location.column = column;
     token->error = NULL;
+}
+
+bool first_token(token *token, const char *data, const char *filename)
+{
+    return first_token_ex(token, data, filename, 0, 1, 1);
+}
+
+bool first_token_ex(token *token, const char *data, const char *filename, size_t offset, size_t line, size_t column)
+{
+    init_token_ex(token, data, filename, offset, line, column);
 
     // Find first token
     return next_token(token);
@@ -313,8 +322,6 @@ static bool token_special(token *token, token_type type, const char *match)
             token->error = "Unknown Token";
             return false;
         }
-        if (*match == 0x00)
-            break;
     }
     token->end_location.offset += token->end - token->begin;
     token->end_location.column += token->end - token->begin;

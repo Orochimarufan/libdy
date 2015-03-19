@@ -30,11 +30,17 @@ int main(int argc, char **argv)
         return -1;
 
     token t;
-    //first_token_ex(&t, json, "test_json.c", 0, 21, 20);
-    first_token(&t, argv[1], "cmdline");
+    //init_token_ex(&t, json, "test_json.c", 0, 21, 20);
+    init_token(&t, argv[1], "cmdline");
 
     while (true)
     {
+        if (!next_token(&t))
+        {
+            printf("ERROR: %s\n\tapprox. at column %d\n", t.error, t.end_location.column);
+            return 1;
+        }
+
         switch (t.type)
         {
             case TOKEN_EOF:
@@ -78,11 +84,6 @@ int main(int argc, char **argv)
             case TOKEN_NULL:
                 puts("NULL");
                 break;
-        }
-        if (!next_token(&t))
-        {
-            printf("ERROR: %s\n\tapprox. at column %d\n", t.error, t.end_location.column);
-            return 1;
         }
     }
 }

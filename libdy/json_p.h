@@ -61,6 +61,18 @@ typedef struct token {
 } token;
 
 // Prototypes
+void init_token(token *token,
+                const char *data,
+                const char *filename);
+
+void init_token_ex(token *token,
+                   const char *data,
+                   const char *filename,
+                   size_t offset,
+                   size_t line,
+                   size_t column);
+
+
 bool first_token(token *token,
                  const char *data,
                  const char *filename);
@@ -72,6 +84,8 @@ bool first_token_ex(token *token,
                     size_t line,
                     size_t column);
 
+
 bool next_token(token *token);
+
 
 DyObject *parse_json(token *start);
