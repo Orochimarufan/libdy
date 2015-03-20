@@ -152,7 +152,7 @@ void Dy_FreeObject(DyObject *o)
     else if (o->type == DY_EXCEPTION)
         exception_destroy(o);
 
-    free(o);
+    dy_free(o);
 }
 
 
@@ -282,18 +282,18 @@ const char *Dy_AsRepr(DyObject *self)
 inline static void TE__notsubscriptable(DyObject *o)
 {
     const char *tn = Dy_GetTypeName(Dy_Type(o));
-    char *txt = malloc(strlen(tn) + 30);
+    char *txt = dy_malloc(strlen(tn) + 30);
     sprintf(txt, "%s object is not subscriptable", tn);
     DyErr_Set(DY_ERRID_TYPE_ERROR, txt);
-    free(txt);
+    dy_free(txt);
 }
 
 inline static void TE__listindex(const char *tn)
 {
-    char *txt = malloc(strlen(tn) + 43);
+    char *txt = dy_malloc(strlen(tn) + 43);
     sprintf(txt, "Lists only support numerical indices, not %s", tn);
     DyErr_Set(DY_ERRID_TYPE_ERROR, txt);
-    free(txt);
+    dy_free(txt);
 }
 
 DyObject *Dy_GetItem(DyObject *self, DyObject *key)

@@ -258,7 +258,7 @@ inline DyObject *DyString_FromString(const char *cstr)
  * @return a new NTBS buffer with the same contents as @param self
  * NOTE: buffer must be freed with free()
  */
-char *DyString_GetString(DyObject *self);
+//char *DyString_GetString(DyObject *self);
 
 /**
  * @brief Get the buffer behind a string object

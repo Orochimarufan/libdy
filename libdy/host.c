@@ -18,13 +18,28 @@
 
 #include "host_p.h"
 
+#include <assert.h>
+
 struct _DyHost DyHost = {
     .string_hash_fn = &Dy_hash_fnv1,
     .dict_table_size = 16,
     .dict_block_size = 16,
+    .mm = {
+        .malloc = malloc,
+        .free = free,
+        .realloc = realloc,
+    },
 };
 
 void DyHost_SetHashFunc(Dy_string_hash_fn func)
 {
     DyHost.string_hash_fn = func;
+}
+
+void DyHost_SetMemoryManager(Dy_MemoryManager_t mm)
+{
+    assert(mm.malloc);
+    assert(mm.free);
+    assert(mm.realloc);
+    DyHost.mm = mm;
 }

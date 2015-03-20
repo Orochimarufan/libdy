@@ -37,7 +37,7 @@ DyObject *DyList_NewEx(size_t allocate)
     DyListObject *self = NEW(DyListObject);
     Dy_InitObject((DyObject *)self, DY_LIST);
     self->allocated = allocate;
-    self->items = malloc(sizeof(DyObject *) * allocate);
+    self->items = dy_malloc(sizeof(DyObject *) * allocate);
     return (DyObject *)self;
 }
 
@@ -59,7 +59,7 @@ inline static int list_resize(DyListObject *self, size_t new_size)
     if (new_size == 0)
     	new_allocated = 0;
     
-    items = realloc(self->items, sizeof(DyObject*) * new_allocated);
+    items = dy_realloc(self->items, sizeof(DyObject*) * new_allocated);
     
     if (items == NULL)
     {
@@ -186,7 +186,7 @@ void list_destroy(DyListObject *self)
     {
     	for (ssize_t i = self->size; --i >= 0; )
     		Dy_Release(self->items[i]);
-    	free(self->items);
+    	dy_free(self->items);
     }
 }
 
@@ -225,7 +225,7 @@ bool DyList_Clear(DyObject *self)
     {
     	for (ssize_t i = ((DyListObject *)self)->size; --i >= 0; )
     		Dy_Release(((DyListObject *)self)->items[i]);
-    	free(((DyListObject *)self)->items);
+    	dy_free(((DyListObject *)self)->items);
     	((DyListObject *)self)->items = NULL;
     	((DyListObject *)self)->size = 0;
     }

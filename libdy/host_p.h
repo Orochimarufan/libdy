@@ -21,7 +21,31 @@
 #include "dy_host.h"
 
 extern struct _DyHost {
+    // Strings
     Dy_string_hash_fn string_hash_fn;
+    // Dictionaries
     size_t dict_table_size;
     size_t dict_block_size;
+    // Memory management
+    Dy_MemoryManager_t mm;
 } DyHost;
+
+inline static size_t smin(size_t a, size_t b)
+{
+    return a > b ? b : a;
+}
+
+inline static void *dy_malloc(size_t size)
+{
+    return DyHost.mm.malloc(size);
+}
+
+inline static void dy_free(void *ptr)
+{
+    return DyHost.mm.free(ptr);
+}
+
+inline static void *dy_realloc(void *ptr, size_t size)
+{
+    return DyHost.mm.realloc(ptr, size);
+}

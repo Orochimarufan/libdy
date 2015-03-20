@@ -20,6 +20,7 @@
 #pragma once
 
 #include "dy.h"
+#include "host_p.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -27,9 +28,9 @@
 
 // Primitive new
 #define /*T**/ NEW(/*typename*/ T)\
-    memset(malloc(sizeof(T)), 0, sizeof(T))
+    memset(dy_malloc(sizeof(T)), 0, sizeof(T))
 #define /*T**/ NEWN(/*typename*/ T, /*int*/ N)\
-    memset(malloc(sizeof(T)*N), 0, sizeof(T)*N)
+    memset(dy_malloc(sizeof(T)*N), 0, sizeof(T)*N)
 
 // Opaque Object Header
 #define DyObject_HEAD\

@@ -393,7 +393,10 @@ static void raise_python_error_in_dy()
 
     PyObject *str = PyObject_Str(exc);
     if (str)
+    {
         DyErr_Format("py.Exception", "Python exception: %s", PyUnicode_AsUTF8(str));
+        Py_DECREF(str);
+    }
     else
         DyErr_Set("py.Exception", "Python exception.");
     Py_DECREF(exc);

@@ -37,6 +37,7 @@ typedef struct _DyStringObject {
 bool DyString_Equals(DyStringObject *, DyStringObject *);
 
 DyStringObject *string_new(const char *s, size_t size);
+DyStringObject *string_new_ex(size_t size);
 
 void string_unintern(DyStringObject *);
 void string_destroy(DyStringObject *self);

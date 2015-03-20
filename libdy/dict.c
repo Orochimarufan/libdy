@@ -83,7 +83,7 @@ bool dict_clean(DyDictObject *self)
     while(block)
     {
         block = (last = block)->next;
-        free(last);
+        dy_free(last);
     }
     
     return true;
@@ -126,7 +126,7 @@ static bucket_t *find_bucket(DyDictObject *o, DyObject *key, Dy_hash_t hash)
 
 static bucket_block_t *create_block(size_t bucket_count)
 {
-    bucket_block_t *block = malloc(sizeof(bucket_block_t) + sizeof(bucket_t) * bucket_count);
+    bucket_block_t *block = dy_malloc(sizeof(bucket_block_t) + sizeof(bucket_t) * bucket_count);
 
     block->size = bucket_count;
     block->next = NULL;

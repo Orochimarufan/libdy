@@ -100,7 +100,7 @@ static inline si_bucket_t *si_get_free_bucket()
         if (!freelist_empty2(block))
     		return freelist_pop2(block);
 
-    si_block_t *block = malloc(sizeof(si_block_t));
+    si_block_t *block = dy_malloc(sizeof(si_block_t));
     freelist_init(&block->freelist, sizeof(si_bucket_t), DY_INTERN_BLOCK_SIZE);
 
     block->next = DyIntern.blocks;

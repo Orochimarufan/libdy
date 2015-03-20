@@ -32,19 +32,32 @@ bool DyString_Check(DyObject *obj);
 DyObject *DyString_FromString(const char *cstr);
 
 // Implementation
-inline static void string_init(DyStringObject *o, const char *value, size_t size)
+DyStringObject *string_new_ex(size_t size)
 {
+    DyStringObject *o = dy_malloc(sizeof(DyStringObject) + size);
+    if (!o)
+    {
+        DyErr_SetMemoryError();
+        return NULL;
+    }
+
+    Dy_InitObject((DyObject*)o, DY_STRING);
+
     o->flags = 0;
     o->size = size;
-    memcpy(o->data, value, size);
-    o->data[size] = 0;
+
+    return o;
 }
 
 DyStringObject *string_new(const char *s, size_t size)
 {
-    DyStringObject *o = malloc(sizeof(DyStringObject) + size);
-    Dy_InitObject((DyObject*)o, DY_STRING);
-    string_init(o, s, size);
+    DyStringObject *o = string_new_ex(size);
+    if (!o)
+        return NULL;
+
+    memcpy(o->data, s, size);
+    o->data[size] = 0;
+
     return o;
 }
 
@@ -76,7 +89,7 @@ inline bool DyString_Equals(DyStringObject *a, DyStringObject *b)
     return a->size == b->size && !memcmp(a->data, b->data, a->size);
 }
 
-char *DyString_GetString(DyObject *self)
+/*char *DyString_GetString(DyObject *self)
 {
     if (!DyString_Check(self))
     {
@@ -88,7 +101,7 @@ char *DyString_GetString(DyObject *self)
     memcpy(buf, ((DyStringObject *)self)->data, ((DyStringObject *)self)->size);
     buf[((DyStringObject *)self)->size] = 0;
     return buf;
-}
+}*/
 
 const char *DyString_AsString(DyObject *self)
 {
@@ -100,9 +113,9 @@ const char *DyString_AsString(DyObject *self)
 
 DyObject *string_repr(DyStringObject *self)
 {
-    char *x = malloc(self->size + 3);
+    char *x = dy_malloc(self->size + 3);
     snprintf(x, self->size + 3, "\"%s\"", self->data);
     DyObject *s = DyString_FromStringAndSize(x, self->size + 2);
-    free(x);
+    dy_free(x);
     return s;
 }

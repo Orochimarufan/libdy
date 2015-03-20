@@ -47,6 +47,19 @@ void DyHost_SetHashFunc(Dy_string_hash_fn func);
 Dy_hash_t Dy_hash_fnv1(const char *data, size_t length);
 Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length);
 
+// Memory management
+typedef void*(*Dy_malloc)(size_t);
+typedef void(*Dy_free)(void*);
+typedef void*(*Dy_realloc)(void*, size_t);
+
+typedef struct Dy_MemoryManager_t {
+    Dy_malloc malloc;
+    Dy_free free;
+    Dy_realloc realloc;
+} Dy_MemoryManager_t;
+
+void DyHost_SetMemoryManager(Dy_MemoryManager_t mm);
+
 #ifdef __cplusplus
 }
 #endif

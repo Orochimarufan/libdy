@@ -52,7 +52,7 @@ void freelist_init(freelist_t *fl, size_t item_size, size_t item_count)
     prev->next = NULL;
 }
 
-freelist_t *freelist_new(size_t item_size, size_t item_count)
+freelist_t *freelist_new(size_t item_size, size_t item_count, void*(*malloc)(size_t))
 {
     freelist_t *fl = malloc(sizeof(freelist_t) + item_size * item_count);
     

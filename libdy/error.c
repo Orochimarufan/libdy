@@ -47,7 +47,7 @@ void DyErr_Clear()
 
 static inline DyObject *DyErr_NewExceptionX(const char *errid, size_t message_size, void *arg)
 {
-    DyExceptionObject *self = malloc(sizeof(DyExceptionObject) + message_size);
+    DyExceptionObject *self = dy_malloc(sizeof(DyExceptionObject) + message_size);
     Dy_InitObject((DyObject*)self, DY_EXCEPTION);
     self->errid = errid;
     self->cause = NULL;

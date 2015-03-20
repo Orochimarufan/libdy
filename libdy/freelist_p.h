@@ -49,9 +49,10 @@ typedef struct freelist_t {
  * @brief Allocate and Initialize a new freelist
  * @param item_size The size of one item
  * @param item_count The number of items
+ * @param malloc The memory allocator to use (usually malloc())
  * @return Pointer to a new freelist
  */
-freelist_t *freelist_new(size_t item_size, size_t item_count);
+freelist_t *freelist_new(size_t item_size, size_t item_count, void*(*malloc)(size_t));
 
 /**
  * @brief Initialize a pre-allocated freelist
@@ -107,8 +108,8 @@ size_t freelist_len(freelist_t *fl);
 
 
 // Convenience Macros
-#define freelist_newt(/* typename */type, /* size_t */count) \
-    (freelist_new(sizeof(type), count))
+#define freelist_newt(/* typename */type, /* size_t */count, malloc) \
+    (freelist_new(sizeof(type), count, malloc))
 
 #define freelist_struct(/* typename */type, /* name */fieldname) \
     struct { \
