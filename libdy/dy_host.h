@@ -28,9 +28,14 @@ extern "C" {
 
 /**
  * @file dy_host.h
- * @brief Managing the library
- * This should only be used by ONE party.
- * In plugin infrastructures, this will usually be the plugin host.
+ * @brief Managing libdy internals
+ *
+ * These functions can be used to modify libdy behaviour like hash functions
+ *  and memory allocation functions.
+ * In a plugin architecture, only the plugin "host" should ever use them.
+ *
+ * PLEASE NOTE that changing any of these after starting to use libdy
+ *  objects WILL cause A LOT OF PROBLEMS. DON'T DO IT!
  */
 
 typedef Dy_hash_t (*Dy_string_hash_fn)(const char *data, size_t length);
@@ -48,14 +53,14 @@ Dy_hash_t Dy_hash_fnv1(const char *data, size_t length);
 Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length);
 
 // Memory management
-typedef void*(*Dy_malloc)(size_t);
-typedef void(*Dy_free)(void*);
-typedef void*(*Dy_realloc)(void*, size_t);
+typedef void*(*Dy_malloc_fn)(size_t);
+typedef void(*Dy_free_fn)(void*);
+typedef void*(*Dy_realloc_fn)(void*, size_t);
 
 typedef struct Dy_MemoryManager_t {
-    Dy_malloc malloc;
-    Dy_free free;
-    Dy_realloc realloc;
+    Dy_malloc_fn malloc;
+    Dy_free_fn free;
+    Dy_realloc_fn realloc;
 } Dy_MemoryManager_t;
 
 void DyHost_SetMemoryManager(Dy_MemoryManager_t mm);
