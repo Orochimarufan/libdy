@@ -59,7 +59,7 @@ size_t dy_buildstring_size(dy_buildstring_t *bs)
     return size;
 }
 
-size_t dy_buildstring_copy(const char *dest, dy_buildstring_t *bs, size_t space)
+size_t dy_buildstring_copy(char *dest, dy_buildstring_t *bs, size_t space)
 {
     size_t size = 0;
     const char *begin = dest;
@@ -96,14 +96,14 @@ void dy_buildstring_free(dy_buildstring_t *bs)
     }
 }
 
-void dy_buildstring_free(dy_buildstring_t *bs, void(*free)(void*))
+void dy_buildstring_free_content(dy_buildstring_t *bs, void(*free)(void*))
 {
     dy_buildstring_t *last;
     while (bs)
     {
         last = bs;
         bs = bs->next;
-        free(last->part);
+        free((char*)last->part); // need to cast off const
         dy_free(last);
     }
 }

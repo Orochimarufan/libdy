@@ -20,6 +20,8 @@
 
 #include "dy_defs.h"
 
+#include <stdlib.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +70,7 @@ size_t dy_buildstring_size(dy_buildstring_t *bs);
  *  size_t size = dy_buildstring_copy(buf, bs, buf_size - 1);
  *  buf[size] = 0;
  */
-size_t dy_buildstring_copy(const char *dest, dy_buildstring_t *bs, size_t space);
+size_t dy_buildstring_copy(char *dest, dy_buildstring_t *bs, size_t space);
 
 /**
  * @brief Create a libdy string from a string builder
