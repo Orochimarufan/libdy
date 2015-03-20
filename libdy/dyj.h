@@ -18,15 +18,16 @@
 
 #pragma once
 
-#include "dy_defs.h"
-
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
-// Types
-typedef enum token_type {
+// -----------------------------------------------------------------------------
+// JSON Tokenization
+// -----------------------------------------------------------------------------
+typedef enum dyj_token_type {
+    TOKEN_INVALID,
     TOKEN_EOF,
-    TOKEN_SPACE,
     TOKEN_BRACE_OPEN,
     TOKEN_BRACE_CLOSE,
     TOKEN_BRACKET_OPEN,
@@ -39,53 +40,131 @@ typedef enum token_type {
     TOKEN_NULL,
     TOKEN_TRUE,
     TOKEN_FALSE,
-} token_type;
+    TOKEN_SPACE,
+} dyj_token_type;
 
-typedef struct token_location {
-    const char *filename;
+typedef struct dyj_token_location {
     size_t offset;
     size_t line;
     size_t column;
-} token_location;
+} dyj_token_location;
 
-typedef struct token {
-    token_type type;
+/**
+ * @class dyj_token_t
+ * @brief A DyJSON token
+ */
+typedef struct dyj_token_t {
+    // Token type
+    dyj_token_type type;
+
+    // Token buffer
     const char *begin;
     const char *end;
-    token_location location;
-    token_location end_location;
-    const char *error;
-    // Not Implemented:
+
+    // Number Values
     long int_value;
     double float_value;
-} token;
 
-// Prototypes
-void init_token(token *token,
-                const char *data,
-                const char *filename);
+    // Location tracking
+    dyj_token_location location;
+    dyj_token_location end_location;
 
-void init_token_ex(token *token,
-                   const char *data,
-                   const char *filename,
-                   size_t offset,
-                   size_t line,
-                   size_t column);
+    // Error message
+    const char *error;
+    dyj_token_location error_location;
+} dyj_token_t;
 
 
-bool first_token(token *token,
-                 const char *data,
-                 const char *filename);
+/**
+ * @brief Initialize the token structure
+ * @param token The token
+ * @param buffer A pointer to the start of the json data
+ */
+void dyj_init_token(dyj_token_t *token,
+                    const char *buffer);
 
-bool first_token_ex(token *token,
-                    const char *data,
-                    const char *filename,
-                    size_t offset,
-                    size_t line,
-                    size_t column);
+/**
+ * @brief Initialize the token structure
+ * @param token The token
+ * @param buffer A pointer to the start of the json data
+ * @param offset The initial offset into the file
+ * @param line The initial line number
+ * @param column The initial column
+ */
+void dyj_init_token_ex(dyj_token_t *token,
+                       const char *buffer,
+                       size_t offset,
+                       size_t line,
+                       size_t column);
+
+/**
+ * @brief Get the next token
+ * @param token The token structure
+ * @return false if it failed, setting a message in token->error
+ */
+bool dyj_next_token(dyj_token_t *token);
 
 
-bool next_token(token *token);
+// -----------------------------------------------------------------------------
+// Streaming
+// -----------------------------------------------------------------------------
+/**
+ * @brief special value for token->error
+ * Indicates that the chunk sentinel ETX was reached
+ */
+extern const char *dyj_chunk_end;
+
+/**
+ * @brief Continue parsing in a new chunk.
+ * @param token The token
+ * @param buffer The new buffer
+ * A chunk must always end in a ETX byte.
+ * The new chunk must contain everything starting with the next token.
+ * This means that the new chunk starts with the same data as token->end.
+ * (chunk boundaries may only occur between tokens)
+ * You can copy the remaining data from token->end or read it from your source
+ *  starting at token->end_location.offset
+ */
+void dyj_next_chunk(dyj_token_t *token,
+                    const char *buffer);
 
 
-DyObject *parse_json(token *start);
+// -----------------------------------------------------------------------------
+// JSON String Tokenization
+// -----------------------------------------------------------------------------
+typedef enum dyj_string_token_type {
+    DYJ_STRTOK_INVALID,
+    DYJ_STRTOK_QUOTE,
+    DYJ_STRTOK_TEXT,
+    DYJ_STRTOK_ESCAPE,
+} dyj_string_token_type;
+
+typedef struct dyj_string_token_t {
+    // Type
+    dyj_string_token_type type;
+
+    // Buffer
+    const char *begin;
+    const char *end;
+
+    // Unicode codepoint for escape sequence
+    uint32_t escape;
+
+    // Error message
+    const char *error;
+    size_t error_offset;
+} dyj_string_token_t;
+
+void dyj_init_string(dyj_string_token_t *strtok,
+                     dyj_token_t *token);
+
+bool dyj_next_string(dyj_string_token_t *strtok);
+
+/**
+ * @brief Convert an Unicode codepoint to utf8 bytes
+ * @param codepoint The codepoint
+ * @param utf8 UTF-8 output buffer, should have at least 7 bytes of space
+ * @return the number of bytes written
+ * Writes the utf8 code units for \c codepoint to \c utf8
+ */
+int dyj_unicode_utf8(uint32_t codepoint, uint8_t *utf8);

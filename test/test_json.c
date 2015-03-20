@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libdy/json_p.h> // Private header!
+#include <libdy/dyj.h> // Private header!
 
 #include <stdio.h>
 
@@ -29,15 +29,16 @@ int main(int argc, char **argv)
     if (argc < 2)
         return -1;
 
-    token t;
-    //init_token_ex(&t, json, "test_json.c", 0, 21, 20);
-    init_token(&t, argv[1], "cmdline");
+    dyj_token_t t;
+    dyj_string_token_t st;
+    //dyj_init_token_ex(&t, json, 0, 21, 20);
+    dyj_init_token(&t, argv[1]);
 
     while (true)
     {
-        if (!next_token(&t))
+        if (!dyj_next_token(&t))
         {
-            printf("ERROR: %s\n\tapprox. at column %d\n", t.error, t.end_location.column);
+            printf("ERROR: %s\n\tapprox. at column %d\n", t.error, t.error_location.column);
             return 1;
         }
 
@@ -65,8 +66,32 @@ int main(int argc, char **argv)
                 break;
             case TOKEN_STRING:
                 printf("STRING ");
-                for (const char *c = t.begin; c < t.end; ++c)
-                    putc(*c, stdout);
+                dyj_init_string(&st, &t);
+                dyj_next_string(&st); // initial quote
+                while (true)
+                {
+                    if (!dyj_next_string(&st))
+                    {
+                        printf("\nERROR: %s\n\tapprox. at column %d\n", st.error, t.location.column + st.error_offset);
+                        return 1;
+                    }
+
+                    if (st.type == DYJ_STRTOK_QUOTE)
+                        break;
+                    else if (st.type == DYJ_STRTOK_TEXT)
+                    {
+                        const char *c = st.begin;
+                        while (c < st.end)
+                            putc(*(c++), stdout);
+                    }
+                    else if (st.type == DYJ_STRTOK_ESCAPE)
+                    {
+                        char utf[10];
+                        size_t s = dyj_unicode_utf8(st.escape, utf);
+                        for (size_t i = 0; i < s; ++i)
+                            putc(utf[i], stdout);
+                    }
+                }
                 putc(0x0a, stdout);
                 break;
             case TOKEN_INT:
