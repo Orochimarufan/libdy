@@ -37,8 +37,8 @@
     <File Name="string_intern.c"/>
     <File Name="callable_p.h"/>
     <File Name="callable.c"/>
-    <File Name="json.c"/>
-    <File Name="json_p.h"/>
+    <File Name="json_token.c"/>
+    <File Name="buildstring.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="dy.h"/>
@@ -47,6 +47,8 @@
     <File Name="dy_host.h"/>
     <File Name="dy_defs.h"/>
     <File Name="dy_callable.h"/>
+    <File Name="dyj.h"/>
+    <File Name="dy_buildstring.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
