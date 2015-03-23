@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <memory.h>
+#include <assert.h>
 
 
 // Primitive new
@@ -48,3 +49,14 @@ bool Dy_HashEx(DyObject *, Dy_hash_t *);
 
 // cause it doesn't go anywhere else either
 void exception_destroy(DyObject *exc);
+
+// Internal repr
+struct dy_buildstring_t;
+struct dy_buildstring_t *bsrepr(struct dy_buildstring_t *bs, DyObject *self);
+
+#define return_error(T) { \
+    assert(DyErr_Occurred() && "return_error: error return without exception set."); \
+    return T; \
+}
+
+#define return_null return_error(NULL)

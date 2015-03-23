@@ -15,27 +15,38 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
-#pragma once
 
-#include "dy_p.h"
+#include "linalloc.h"
 
-/**
- * @file list_p.h
- * @brief List implementation header
- */
 
-typedef struct _DyListObject {
-    DyObject_HEAD
-    size_t size;
-    size_t allocated;
-    DyObject **items;
-} DyListObject;
+struct dy_linalloc_t {
+    size_t freect;
+    void *next;
+    uint8_t data[0];
+};
 
-void list_destroy(DyListObject *self);
 
-DyObject *list_getitem(DyListObject *self, ssize_t key);
-DyObject *list_getitemu(DyListObject *self, ssize_t key);
-bool list_setitem(DyListObject *self, ssize_t key, DyObject *value);
+dy_linalloc_t *dy_linalloc_new(size_t size, void*(*malloc)(size_t))
+{
+    dy_linalloc_t *la = malloc(sizeof(struct dy_linalloc_t) + size);
+    if (!la)
+        return NULL;
 
-struct dy_buildstring_t *list_bsrepr(struct dy_buildstring_t *bs, DyListObject *self);
+    la->freect = size;
+    la->next = la->data;
+    return la;
+}
+
+void *dy_linalloc_malloc(dy_linalloc_t *la, size_t size)
+{
+    if (la->freect < size)
+        return NULL;
+    void *mem = la->next;
+    la->next += size;
+    return mem;
+}
+
+size_t dy_linalloc_remaining(dy_linalloc_t *la)
+{
+    return la->freect;
+}

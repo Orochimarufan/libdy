@@ -43,4 +43,5 @@ void string_unintern(DyStringObject *);
 void string_destroy(DyStringObject *self);
 
 Dy_hash_t string_hash(DyStringObject *self);
-DyObject *string_repr(DyStringObject *self);
+
+struct dy_buildstring_t *string_bsrepr(struct dy_buildstring_t *bs, DyStringObject *self);

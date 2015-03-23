@@ -23,12 +23,14 @@
 #include "callable_p.h"
 #include "dy_error.h"
 #include "dy_string.h"
+#include "dy_buildstring.h"
 
 #include <stdlib.h>
 #include <memory.h>
 //#include <stdatomic.h>
 #include <stdio.h>
 #include <assert.h>
+#include <inttypes.h>
 
 
 void Dy_InitObject(DyObject *o, DyObject_Type t)
@@ -68,8 +70,16 @@ bool DyLong_Check(DyObject *self);
 DyObject *DyLong_New(int64_t value)
 {
     DyObject *o = NEW(DyIntegral_Object);
+    if (!o)
+    {
+        DyErr_SetMemoryError();
+        return_null;
+    }
+
     Dy_InitObject(o, DY_LONG);
+
     ((DyIntegral_Object*)o)->value = value;
+
     return o;
 }
 
@@ -78,7 +88,7 @@ int64_t DyLong_Get(DyObject *self)
     if (!DyLong_Check(self))
     {
         DyErr_SetArgumentTypeError("DyIntegral_GetInt", 0, "Integral", Dy_GetTypeName(Dy_Type(self)));
-        return 0;
+        return_error(-1);
     }
     return ((DyIntegral_Object*)self)->value;
 }
@@ -93,8 +103,16 @@ bool DyFloat_Check(DyObject *self);
 DyObject *DyFloat_New(double value)
 {
     DyObject *o = NEW(DyFloating_Object);
+    if (!o)
+    {
+        DyErr_SetMemoryError();
+        return_null;
+    }
+
     Dy_InitObject(o, DY_FLOAT);
+
     ((DyFloating_Object*)o)->value = value;
+
     return o;
 }
 
@@ -103,8 +121,9 @@ double DyFloat_Get(DyObject *self)
     if (!DyFloat_Check(self))
     {
         DyErr_SetArgumentTypeError("DyFloating_GetDouble", 0, "Floating", Dy_GetTypeName(Dy_Type(self)));
-        return 0;
+        return_error(-1.0);
     }
+
     return ((DyFloating_Object*)self)->value;
 }
 
@@ -120,7 +139,7 @@ DyObject *Dy_Retain(DyObject *self)
 void Dy_Release(DyObject *self)
 {
     //if (Dy_Type(self) != DY_STRING)
-    //    printf("Release %s\n", Dy_AsRepr(self));
+    //    printf("Release 0x%p %s %d\n", self, Dy_AsRepr(self), self->refcnt);
     if (!--self->refcnt)
         Dy_FreeObject(self);
 }
@@ -182,7 +201,7 @@ Dy_hash_t Dy_Hash(DyObject *self)
     if (!Dy_HashEx(self, &result))
     {
     	DyErr_Set(DY_ERRID_NOT_HASHABLE, "Object is not hashable.");
-    	return 0;
+    	return_error(0);
     }
     return result;
 }
@@ -208,13 +227,41 @@ bool Dy_Equals(DyObject *a, DyObject *b)
     }
 }
 
+static bool has_repr = false;
+static DyObject *none_repr;
+static DyObject *true_repr;
+static DyObject *false_repr;
+
 DyObject *Dy_Repr(DyObject *obj)
 {
-    static bool has_repr = false;
-    static DyObject *none_repr;
-    static DyObject *true_repr;
-    static DyObject *false_repr;
+    dy_buildstring_t *bs = dy_buildstring_new("", 0);
+    dy_buildstring_t *lbs = bsrepr(bs, obj);
+    DyObject *result = NULL;
 
+    if (lbs)
+        result = dy_buildstring_build(bs);
+    else
+        assert(DyErr_Occurred());
+
+    dy_buildstring_free(bs);
+
+    return result;
+}
+
+
+#define bs_printf(bs, fmt, ...) \
+({ \
+    nbs = dy_buildstring_printf(bs, fmt, __VA_ARGS__); \
+    if (!nbs) \
+    { \
+        DyErr_SetMemoryError(); \
+        return_null; \
+    } \
+    nbs; \
+})
+
+dy_buildstring_t *bsrepr(dy_buildstring_t *bs, DyObject *self)
+{
     if (!has_repr)
     {
         has_repr = true;
@@ -223,36 +270,41 @@ DyObject *Dy_Repr(DyObject *obj)
         false_repr = DyString_InternStringFromString("False");
     }
 
-    char buf[256];
+    dy_buildstring_t *nbs;
 
-    switch(obj->type)
+    switch(self->type)
     {
     case DY_NONE:
-        return Dy_Retain(none_repr);
+        return dy_buildstring_append2(bs, none_repr);
     case DY_BOOL:
-        return Dy_Retain(obj == Dy_True ? true_repr : false_repr);
+        return dy_buildstring_append2(bs, self == Dy_True ? true_repr : false_repr);
     case DY_LONG:
-        snprintf(buf, 255, "%li", ((DyIntegral_Object*)obj)->value);
-        return DyString_FromString(buf);
+        return bs_printf(bs, "%" PRId64, ((DyIntegral_Object*)self)->value);
     case DY_FLOAT:
-        snprintf(buf, 255, "%f", ((DyFloating_Object*)obj)->value);
-        return DyString_FromString(buf);
+        return bs_printf(bs, "%f", ((DyFloating_Object*)self)->value);
     case DY_STRING:
-        return string_repr((DyStringObject *)obj);
+        return string_bsrepr(bs, (DyStringObject *)self);
     case DY_DICT:
-        return dict_repr((DyDictObject *)obj);
+        return dict_bsrepr(bs, (DyDictObject *)self);
     case DY_LIST:
-    	return list_repr((DyListObject *)obj);
+    	return list_bsrepr(bs, (DyListObject *)self);
     case DY_CALLABLE:
-    	snprintf(buf, 255, "<Callable at 0x%p (%x)>", ((DyCallableObject*)obj)->function, ((DyCallableObject*)obj)->flags);
-    	return DyString_FromString(buf);
+    	return bs_printf(bs, "<Callable at 0x%p (%x)>", ((DyCallableObject*)self)->function, ((DyCallableObject*)self)->flags);
     case DY_EXCEPTION:
-        snprintf(buf, 255, "<Exception %s: %s>", DyErr_ErrId(obj), DyErr_Message(obj));
-        return DyString_FromString(buf);
+        return bs_printf(bs, "<Exception %s: %s>", DyErr_ErrId(self), DyErr_Message(self));
     default:
-        return DyString_InternStringFromString("<<NotImplemented>>");
+        nbs = dy_buildstring_append(bs, "<<NotImplemented>>", 18);
+        if (!nbs)
+        {
+            DyErr_SetMemoryError();
+            return_null;
+        }
+        return nbs;
     }
 }
+
+#undef bs_printf
+
 
 DyObject *Dy_Str(DyObject *obj)
 {
@@ -267,13 +319,13 @@ DyObject *Dy_Str(DyObject *obj)
 
 const char *Dy_AsRepr(DyObject *self)
 {
-    static char buffer[1025];
+    static char buffer[10241];
     
     DyObject *s = Dy_Repr(self);
-    strncpy(buffer, DyString_AsString(s), 1024);
+    strncpy(buffer, DyString_AsString(s), 10240);
     Dy_Release(s);
     
-    buffer[1024] = 0;
+    buffer[10240] = 0;
     
     return buffer;
 }
@@ -282,17 +334,34 @@ const char *Dy_AsRepr(DyObject *self)
 inline static void TE__notsubscriptable(DyObject *o)
 {
     const char *tn = Dy_GetTypeName(Dy_Type(o));
+
     char *txt = dy_malloc(strlen(tn) + 30);
+    if (!txt)
+    {
+        DyErr_SetMemoryError();
+        return;
+    }
+
     sprintf(txt, "%s object is not subscriptable", tn);
+
     DyErr_Set(DY_ERRID_TYPE_ERROR, txt);
+
     dy_free(txt);
 }
 
 inline static void TE__listindex(const char *tn)
 {
     char *txt = dy_malloc(strlen(tn) + 43);
+    if (!txt)
+    {
+        DyErr_SetMemoryError();
+        return;
+    }
+
     sprintf(txt, "Lists only support numerical indices, not %s", tn);
+
     DyErr_Set(DY_ERRID_TYPE_ERROR, txt);
+
     dy_free(txt);
 }
 
@@ -306,12 +375,12 @@ DyObject *Dy_GetItem(DyObject *self, DyObject *key)
     	if (key->type != DY_LONG)
     	{
     		TE__listindex(Dy_GetTypeName(Dy_Type(key)));
-    		return NULL;
+    		return_null;
     	}
     	return list_getitem((DyListObject *)self, DyLong_Get(key));
     default:
     	TE__notsubscriptable(self);
-    	return NULL;
+    	return_null;
     }
 }
 
@@ -322,16 +391,21 @@ DyObject *Dy_GetItemString(DyObject *self, const char *key)
     case DY_DICT:
     {
     	DyObject *k = DyString_InternStringFromString(key);
+        if (!k)
+            return_null;
+
     	DyObject *r = dict_getitem((DyDictObject *)self, k);
+
     	Dy_Release(k);
+
     	return r;
     }
     case DY_LIST:
     	TE__listindex(Dy_GetTypeName(DY_STRING));
-    	return NULL;
+    	return_null;
     default:
     	TE__notsubscriptable(self);
-    	return NULL;
+    	return_null;
     }
 }
 
@@ -342,15 +416,20 @@ DyObject *Dy_GetItemLong(DyObject *self, long key)
     case DY_DICT:
     {
     	DyObject *k = DyLong_New(key);
+        if (!k)
+            return_null;
+
     	DyObject *r = dict_getitem((DyDictObject *)self, k);
+
     	Dy_Release(k);
+
     	return r;
     }
     case DY_LIST:
     	return list_getitem((DyListObject *)self, key);
     default:
     	TE__notsubscriptable(self);
-    	return NULL;
+    	return_null;
     }
 }
 
@@ -364,12 +443,12 @@ DyObject *Dy_GetItemU(DyObject *self, DyObject *key)
     	if (key->type != DY_LONG)
     	{
     		TE__listindex(Dy_GetTypeName(Dy_Type(key)));
-    		return NULL;
+    		return_null;
     	}
     	return list_getitemu((DyListObject *)self, DyLong_Get(key));
     default:
     	TE__notsubscriptable(self);
-    	return NULL;
+    	return_null;
     }
 }
 
@@ -383,12 +462,12 @@ bool Dy_SetItem(DyObject *self, DyObject *key, DyObject *value)
     	if (key->type != DY_LONG)
     	{
     		TE__listindex(Dy_GetTypeName(Dy_Type(key)));
-    		return false;
+    		return_error(false);
     	}
     	return list_setitem((DyListObject *) self, DyLong_Get(key), value);
     default:
     	TE__notsubscriptable(self);
-    	return false;
+    	return_error(false);
     }
 }
 
@@ -399,16 +478,21 @@ bool Dy_SetItemString(DyObject *self, const char *key, DyObject *value)
     case DY_DICT:
     {
     	DyObject *k = DyString_InternStringFromString(key);
+        if (!k)
+            return_error(false);
+
     	bool r = dict_setitem((DyDictObject *)self, k, value);
+
     	Dy_Release(k);
+
     	return r;
     }
     case DY_LIST:
     	TE__listindex(key);
-    	return false;
+    	return_error(false);
     default:
     	TE__notsubscriptable(self);
-    	return false;
+    	return_error(false);
     }
 }
 
@@ -419,15 +503,20 @@ bool Dy_SetItemLong(DyObject *self, long key, DyObject *value)
     	case DY_DICT:
     	{
     		DyObject *k = DyLong_New(key);
+            if (!k)
+                return_error(false);
+
     		bool r = dict_setitem((DyDictObject *)self, k, value);
+
     		Dy_Release(k);
+
     		return r;
     	}
     	case DY_LIST:
     		return list_setitem((DyListObject *)self, key, value);
     	default:
     		TE__notsubscriptable(self);
-    		return false;
+    		return_error(false);
     }
 }
 
@@ -442,6 +531,6 @@ size_t Dy_Length(DyObject *self)
     	return ((DyStringObject *)self)->size;
     default:
     	DyErr_SetArgumentTypeError("Dy_Length", 0, "list or string", Dy_GetTypeName(self->type));
-    	return 0;
+    	return_error(0);
     }
 }

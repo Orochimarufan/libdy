@@ -46,3 +46,13 @@ def build(bld):
         cflags=["-std=c11"],
         use="dy",
     )
+
+    bld.program(
+        features="c cprogram",
+        source="test_jsonfile.c",
+        target="test_jsonfile",
+
+        includes=[".."],
+        cflags=["-std=c11"],
+        use="dy",
+    )

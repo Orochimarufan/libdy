@@ -60,7 +60,8 @@ typedef struct _DyDictObject {
 // Prototypes
 void dict_destroy(DyDictObject *self);
 bool dict_clean(DyDictObject *self);
-DyObject *dict_repr(DyDictObject *self);
+
+struct dy_buildstring_t *dict_bsrepr(struct dy_buildstring_t *bs, DyDictObject *self);
 
 DyObject *dict_get(DyDictObject *o, DyObject *key, Dy_hash_t hash);
 

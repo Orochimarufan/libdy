@@ -43,6 +43,8 @@ typedef enum dyj_token_type {
     TOKEN_SPACE,
 } dyj_token_type;
 
+extern const char *dyj_token_names[];
+
 typedef struct dyj_token_location {
     size_t offset;
     size_t line;
@@ -62,7 +64,7 @@ typedef struct dyj_token_t {
     const char *end;
 
     // Number Values
-    long int_value;
+    int64_t int_value;
     double float_value;
 
     // Location tracking

@@ -19,6 +19,8 @@ public_headers = (
     "dy_callable.h",
     "dy_buildstring.h",
     "dyj.h",
+    "json.h",
+    "linalloc.h",
 )
 
 sources = (
@@ -32,8 +34,10 @@ sources = (
     "freelist.c",
     "string_intern.c",
     "callable.c",
+    "linalloc.c",
     "buildstring.c",
     "json_token.c",
+    "json.c",
 )
 
 # Build

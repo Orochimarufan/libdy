@@ -43,3 +43,7 @@ void DyHost_SetMemoryManager(Dy_MemoryManager_t mm)
     assert(mm.realloc);
     DyHost.mm = mm;
 }
+
+void *dy_malloc(size_t);
+void *dy_realloc(void *, size_t);
+void dy_free(void *);

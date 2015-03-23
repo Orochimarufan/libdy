@@ -22,6 +22,25 @@
 #include <string.h>
 
 
+const char *dyj_token_names[] = {
+    "Invalid",
+    "EOF",
+    "Opening Brace '{'",
+    "Closing Brace '}'",
+    "Opening Bracket '['",
+    "Closing Bracket ']'",
+    "Colon ':'",
+    "Comma ','",
+    "String",
+    "Integral Number",
+    "Floating Number",
+    "null",
+    "true",
+    "false",
+    "Spacing",
+};
+
+
 // -----------------------------------------------------------------------------
 // JSON Tokenization
 // -----------------------------------------------------------------------------
@@ -120,7 +139,7 @@ static bool token_space(dyj_token_t *token)
         else if (*here == '\n')
         {
             ++line;
-            column = 0;
+            column = 1;
         }
         else
             break;
@@ -178,7 +197,7 @@ static bool token_number(dyj_token_t *token)
 {
     const char *here = token->begin;
     dyj_token_type type = TOKEN_INT;
-    long value = 0;
+    int64_t value = 0;
 
     int negate = 1;
     if (*here == '-')
@@ -265,7 +284,7 @@ static bool token_number(dyj_token_t *token)
             else
                 break;
 
-        token->float_value *= pow(10.0, exponent * nexp);
+        fvalue *= pow(10.0, exponent * nexp);
     }
 
     // If we encounter ETX, we can't be sure the whole number has been read.

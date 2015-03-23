@@ -23,6 +23,7 @@
     <File Name="main.c"/>
     <File Name="main.cpp"/>
     <File Name="test_json.c"/>
+    <File Name="test_jsonfile.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>

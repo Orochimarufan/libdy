@@ -82,8 +82,10 @@ DyObject *DyErr_Format(const char *errid, const char *format, ...)
     DyObject *e = DyErr_NewExceptionX(errid, len + 1, NULL);
     
     va_start(va, format);
-    vsnprintf(((DyExceptionObject*)e)->message, len, format, va);
+    vsnprintf(((DyExceptionObject*)e)->message, len + 1, format, va);
     va_end(va);
+
+    DyErr_SetObject(Dy_Pass(e));
     
     return e;
 }

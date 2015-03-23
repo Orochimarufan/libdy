@@ -213,10 +213,7 @@ void *    	DyErr_Data(DyObject *self);
 #define DY_ERR_RETHROW() \
                     __ehandled = false;
 
-#define DY_ERR_RETHROW_RETURN() \
-                    return __exception;
-
-#define DY_ERR_RETHROW_RETURN_VAL(val) \
+#define DY_ERR_RETHROW_RETURN(val) \
                     return val;
 
 #define DY_ERR_HANDLER_END \

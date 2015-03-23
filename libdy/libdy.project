@@ -39,6 +39,8 @@
     <File Name="callable.c"/>
     <File Name="json_token.c"/>
     <File Name="buildstring.c"/>
+    <File Name="json.c"/>
+    <File Name="linalloc.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="dy.h"/>
@@ -49,6 +51,8 @@
     <File Name="dy_callable.h"/>
     <File Name="dyj.h"/>
     <File Name="dy_buildstring.h"/>
+    <File Name="json.h"/>
+    <File Name="linalloc.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>

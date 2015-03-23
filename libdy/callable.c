@@ -94,7 +94,7 @@ bool DyCallable_Check(DyObject *self)
 DyObject *Dy_Call(DyObject *self, DyObject *arglist)
 {
     if (DyErr_CheckArg("Dy_Call", 0, DY_CALLABLE, self) || DyErr_CheckArg("Dy_Call", 1, DY_LIST, arglist))
-    	return NULL;
+    	return_null;
     
     DyCallableObject *co = (DyCallableObject *)self;
     
@@ -104,7 +104,7 @@ DyObject *Dy_Call(DyObject *self, DyObject *arglist)
     	if (Dy_Length(arglist) != 0)
     	{
     		DyErr_Format(DY_ERRID_ARGUMENT_COUNT, "Callable takes no arguments, %i arguments given", Dy_Length(arglist));
-    		return NULL;
+    		return_null;
     	}
     	
     	if (co->flags & DCD_HASDATA)
@@ -115,7 +115,7 @@ DyObject *Dy_Call(DyObject *self, DyObject *arglist)
     	if (Dy_Length(arglist) != 1)
     	{
     		DyErr_Format(DY_ERRID_ARGUMENT_COUNT, "Callable takes 1 argument, %i arguments given", Dy_Length(arglist));
-    		return NULL;
+    		return_null;
     	}
     	
     	DyObject *arg = Dy_GetItemLong(arglist, 0);
@@ -137,7 +137,7 @@ DyObject *Dy_Call(DyObject *self, DyObject *arglist)
 DyObject *Dy_Call0(DyObject *self)
 {
     if (DyErr_CheckArg("Dy_Call1", 0, DY_CALLABLE, self))
-    	return NULL;
+    	return_null;
     
     DyCallableObject *co = (DyCallableObject *)self;
     
@@ -151,7 +151,7 @@ DyObject *Dy_Call0(DyObject *self)
     else if (co->flags >> 1 == DCT_SIMPLE)
     {
     	DyErr_Set(DY_ERRID_ARGUMENT_COUNT, "Callable takes 1 argument, no arguments given");
-    	return NULL;
+    	return_null;
     }
     else
     {
@@ -168,14 +168,14 @@ DyObject *Dy_Call0(DyObject *self)
 DyObject *Dy_Call1(DyObject *self, DyObject *arg)
 {
     if (DyErr_CheckArg("Dy_Call1", 0, DY_CALLABLE, self))
-    	return NULL;
+    	return_null;
     
     DyCallableObject *co = (DyCallableObject *)self;
     
     if (co->flags >> 1 == DCT_NOARG)
     {
     	DyErr_Set(DY_ERRID_ARGUMENT_COUNT, "Callable takes no arguments, 1 argument given");
-    	return NULL;
+    	return_null;
     }
     else if (co->flags >> 1 == DCT_SIMPLE)
     {

@@ -15,27 +15,44 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #pragma once
 
-#include "dy_p.h"
+#include <stdint.h>
+#include <stdlib.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+typedef struct dy_linalloc_t dy_linalloc_t;
+
 
 /**
- * @file list_p.h
- * @brief List implementation header
+ * @brief Create a new linear memory pool
+ * @param size The pool size
+ * @return A new linear memory pool
  */
+dy_linalloc_t *dy_linalloc_new(size_t size, void*(*malloc)(size_t));
 
-typedef struct _DyListObject {
-    DyObject_HEAD
-    size_t size;
-    size_t allocated;
-    DyObject **items;
-} DyListObject;
+/**
+ * @brief Allocate memory from the pool
+ * @param la The linalloc instance
+ * @param size The anmount of memory needed
+ * @return A free chunk of memory
+ */
+void *dy_linalloc_malloc(dy_linalloc_t *la, size_t size);
 
-void list_destroy(DyListObject *self);
+/**
+ * @brief Check how much memory is free in the pool
+ * @param la The linalloc instance
+ * @return The anmount of free memory in the pool
+ */
+size_t dy_linalloc_remaining(dy_linalloc_t *la);
 
-DyObject *list_getitem(DyListObject *self, ssize_t key);
-DyObject *list_getitemu(DyListObject *self, ssize_t key);
-bool list_setitem(DyListObject *self, ssize_t key, DyObject *value);
 
-struct dy_buildstring_t *list_bsrepr(struct dy_buildstring_t *bs, DyListObject *self);
+#ifdef __cplusplus
+}
+#endif

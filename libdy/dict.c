@@ -41,22 +41,35 @@ static inline void dict_init(DyDictObject *o)
 DyObject *DyDict_New()
 {
     DyDictObject *self = NEW(DyDictObject);
+    if (!self)
+    {
+        DyErr_SetMemoryError();
+        return_null;
+    }
+
     Dy_InitObject((DyObject *)self, DY_DICT);
     dict_init(self);
+
     return (DyObject *)self;
 }
 
 DyObject *DyDict_NewWithParent(DyObject *parent)
 {
-    if (!DyDict_Check(parent))
-    {
-        DyErr_SetArgumentTypeError("DyDict_NewWithParent", 1, "Object", Dy_GetTypeName(parent->type));
-        return NULL;
-    }
+    if (DyErr_CheckArg("DyDict_NewWithParent", 1, DY_DICT, parent))
+        return_null;
+
     DyDictObject *self = NEW(DyDictObject);
+    if (!self)
+    {
+        DyErr_SetMemoryError();
+        return_null;
+    }
+
     Dy_InitObject((DyObject *)self, DY_DICT);
     dict_init(self);
+
     self->parent = (DyDictObject*)Dy_Retain(parent);
+
     return (DyObject *)self;
 }
 
@@ -94,7 +107,7 @@ bool DyDict_Clear(DyObject *self)
     if (!DyDict_Check(self))
     {
         DyErr_SetArgumentTypeError("DyDict_Clear", 0, "Dict", Dy_GetTypeName(Dy_Type(self)));
-        return false;
+        return_error(false);
     }
 
     return dict_clean((DyDictObject*)self);
@@ -164,6 +177,10 @@ static bucket_t *find_or_create_bucket(DyDictObject *o, DyObject *key, Dy_hash_t
 
     // Grab a bucket from the last block
     bucket = freelist_pop2(o->blocks);
+
+    // clear data (would cause issues with Dy_Release)
+    bucket->key = NULL;
+    bucket->value = NULL;
 
     // Add it to the chain for the table slot
     bucket->next = first->next;
@@ -252,7 +269,7 @@ bool dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
     if (!Dy_HashEx(key, &hash))
     {
         TE__unhashable(key);
-        return false;
+        return_error(false);
     }
     
     // Delete
@@ -313,7 +330,7 @@ DyObject *dict_getitemu(DyDictObject *self, DyObject *key)
     if (!Dy_HashEx(key, &hash))
     {
         TE__unhashable(key);
-        return NULL;
+        return_null;
     }
     
     DyDictObject *cur = self;
@@ -334,31 +351,62 @@ DyObject *dict_getitem(DyDictObject *self, DyObject *key)
     if (result == Dy_Undefined)
     {
     	__KeyError(key);
-    	return NULL;
+    	return_null;
     }
     else
     	return result;
 }
 
-#define DICT_REPR_BUFFER 8192
+// Repr ------------------------------------------------------------------------
+#include "dy_buildstring.h"
 
-DyObject *dict_repr(DyDictObject *self)
+dy_buildstring_t *dict_bsrepr(dy_buildstring_t *bs, DyDictObject *self)
 {
-    char buffer[DICT_REPR_BUFFER] = {'{', '\0'};
-    int pos = 1;
+    dy_buildstring_t *lbs = bs = dy_buildstring_append(bs, "{", 1);
+    if (!lbs)
+    {
+        DyErr_SetMemoryError();
+        return_null;
+    }
+
     for (int i = 0; i < DY_TABLE_SIZE; ++i)
         for (bucket_t *b = &self->table[i]; b; b = b->next)
         {
             if (!b->key)
                 continue;
-            DyObject *k = Dy_Repr(b->key);
-            DyObject *v = Dy_Repr(b->value);
-            pos += snprintf(buffer + pos, DICT_REPR_BUFFER - pos, "%s: %s, ", DyString_AsString(k), DyString_AsString(v));
-            Dy_Release(k);
-            Dy_Release(v);
+
+            // KEY
+            lbs = bsrepr(lbs, b->key);
+            if (!lbs)
+                return_null;
+
+            // SEPARATOR
+            lbs = dy_buildstring_append(lbs, ": ", 2);
+            if (!lbs)
+            {
+                DyErr_SetMemoryError();
+                return_null;
+            }
+
+            // VALUE
+            lbs = bsrepr(lbs, b->value);
+            if (!lbs)
+                return_null;
+
+            // SEPARATOR
+            lbs = dy_buildstring_append(lbs, ", ", 2);
+            if (!lbs)
+            {
+                DyErr_SetMemoryError();
+                return_null;
+            }
         }
-    if (pos != 1)
-        pos -= 2;
-    memcpy(buffer + pos++, "}", 2);
-    return DyString_FromStringAndSize(buffer, pos);
+
+    if (bs != lbs)
+    {
+        lbs->part = "}";
+        lbs->part_size = 1;
+    }
+
+    return lbs;
 }

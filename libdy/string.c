@@ -38,7 +38,7 @@ DyStringObject *string_new_ex(size_t size)
     if (!o)
     {
         DyErr_SetMemoryError();
-        return NULL;
+        return_null;
     }
 
     Dy_InitObject((DyObject*)o, DY_STRING);
@@ -53,7 +53,7 @@ DyStringObject *string_new(const char *s, size_t size)
 {
     DyStringObject *o = string_new_ex(size);
     if (!o)
-        return NULL;
+        return_null;
 
     memcpy(o->data, s, size);
     o->data[size] = 0;
@@ -106,7 +106,7 @@ inline bool DyString_Equals(DyStringObject *a, DyStringObject *b)
 const char *DyString_AsString(DyObject *self)
 {
     if (DyErr_CheckArg("DyString_AsString", 0, DY_STRING, self))
-    	return NULL;
+    	return_null;
 
     return ((DyStringObject *)self)->data;
 }
@@ -118,4 +118,27 @@ DyObject *string_repr(DyStringObject *self)
     DyObject *s = DyString_FromStringAndSize(x, self->size + 2);
     dy_free(x);
     return s;
+}
+
+// Repr ------------------------------------------------------------------------
+#include "dy_buildstring.h"
+
+dy_buildstring_t *string_bsrepr(dy_buildstring_t *bs, DyStringObject *self)
+{
+    dy_buildstring_t *lbs = dy_buildstring_append(bs, "\"", 1);
+    if (!lbs)
+    {
+        DyErr_SetMemoryError();
+        return_null;
+    }
+
+    lbs = dy_buildstring_append2(lbs, (DyObject*)self);
+
+    if (!lbs)
+        return_null;
+
+    lbs = dy_buildstring_append(lbs, "\"", 1);
+    if (!lbs)
+        DyErr_SetMemoryError();
+    return lbs;
 }
