@@ -20,7 +20,7 @@
 
 /**
  * @file libdy/numbers.h
- * @brief libdy numerical (int/float) objects
+ * @brief libdy numerical objects (int, float)
  */
  
  #include "types.h"
@@ -35,22 +35,25 @@ extern "C" {
 #endif
 
 // ----------------------------------------------------------------------------
-// Integers
+///@{
+///@name Integers
 LIBDY_API bool DyLong_Check(DyObject *obj);
 
 LIBDY_API DyObject *DyLong_New(int64_t value);
 
 LIBDY_API int64_t DyLong_Get(DyObject *self);
 
+///@}
 // ----------------------------------------------------------------------------
-// Floats
+///@{
+///@name Floats
 LIBDY_API bool DyFloat_Check(DyObject *obj);
 
 LIBDY_API DyObject *DyFloat_New(double value);
 
 LIBDY_API double DyFloat_Get(DyObject *self);
 
-
+///@}
 #ifdef __cplusplus
 }
 #endif

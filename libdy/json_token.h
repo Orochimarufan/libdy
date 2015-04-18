@@ -16,6 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file json_token.h
+ * @brief libdy JSON tokenizer
+ */
+
 #pragma once
 
 #include "config.h"
@@ -23,6 +28,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // -----------------------------------------------------------------------------
 // JSON Tokenization
@@ -109,8 +118,9 @@ LIBDY_API void dyj_init_token_ex(dyj_token_t *token,
 LIBDY_API bool dyj_next_token(dyj_token_t *token);
 
 
+///@{
 // -----------------------------------------------------------------------------
-// Streaming
+///@name Streaming
 // -----------------------------------------------------------------------------
 /**
  * @brief special value for token->error
@@ -122,6 +132,7 @@ extern LIBDY_API const char *dyj_chunk_end;
  * @brief Continue parsing in a new chunk.
  * @param token The token
  * @param buffer The new buffer
+ *
  * A chunk must always end in a ETX byte.
  * The new chunk must contain everything starting with the next token.
  * This means that the new chunk starts with the same data as token->end.
@@ -133,8 +144,9 @@ LIBDY_API void dyj_next_chunk(dyj_token_t *token,
                               const char *buffer);
 
 
+///@}@{
 // -----------------------------------------------------------------------------
-// JSON String Tokenization
+///@name JSON String Tokenization
 // -----------------------------------------------------------------------------
 typedef enum dyj_string_token_type {
     DYJ_STRTOK_INVALID,
@@ -179,6 +191,13 @@ LIBDY_API bool dyj_next_string(dyj_string_token_t *strtok);
  * @param codepoint The codepoint
  * @param utf8 UTF-8 output buffer, should have at least 7 bytes of space
  * @return the number of bytes written
+ *
  * Writes the utf8 code units for \c codepoint to \c utf8
  */
 LIBDY_API int dyj_unicode_utf8(uint32_t codepoint, uint8_t *utf8);
+
+
+///@}
+#ifdef __cplusplus
+}
+#endif

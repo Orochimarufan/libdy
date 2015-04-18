@@ -16,12 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 /**
  * @file libdy/dy.h
  * @brief Culmutative libdy header.
+ * @note exceptions_c.h will not be included when this header is used from C++.
  */
+
+#pragma once
 
 #include "object.h"
 #include "constants.h"

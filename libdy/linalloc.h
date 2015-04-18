@@ -21,10 +21,11 @@
 /**
  * @file libdy/linalloc.h
  * @brief A simple linear allocator.
+ *
  * Create a new pool using dy_linalloc_new(), passing it a parent allocator
  * Then it can be used through dy_linalloc_malloc() and dy_linalloc_remaining()
  * Finally, free the whole pool using the parent allocator's free()
- * 
+ *
  * This is mostly useful to store larger anmounts of temporary data.
  */
 

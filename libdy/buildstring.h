@@ -16,11 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 /**
  * @file libdy/buildstring.h
  * @brief A string building utility.
+ *
  * This is an API for incrementally building a string while avoiding copying
  * the whole string around large anmounts of times.
  * 
@@ -43,11 +42,12 @@
  * if you intend to use dy_buildstring_free_content()
  */
 
+#pragma once
+
 #include "types.h"
 #include "config.h"
 
 #include <stdlib.h>
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +56,10 @@ extern "C" {
 
 typedef void(*dy_buildstring_part_free_fn)(char*);
 
-// FIXME: make this private?
+/**
+ * @brief Buildstring part node
+ * @attention This might become private in the future
+ */
 typedef struct dy_buildstring_t {
     const char *part;                       ///< The data this part refers to
     size_t part_size;                       ///< The size of this part
@@ -70,7 +73,7 @@ typedef struct dy_buildstring_t {
  * @param part The first part
  * @param size The size of the first part
  * @return A new string builder or NULL if allocation failed
- * NOTE: The part content is not copied, so it needs to outlive the string builder
+ * @attention The part content is not copied, so it needs to outlive the string builder
  */
 LIBDY_API dy_buildstring_t *dy_buildstring_new(const char *part, size_t size);
 
@@ -80,7 +83,7 @@ LIBDY_API dy_buildstring_t *dy_buildstring_new(const char *part, size_t size);
  * @param part The part
  * @param size The part size
  * @return NULL if allocation failed
- * NOTE: The part content is not copied, so it needs to outlive the string builder
+ * @attention The part content is not copied, so it needs to outlive the string builder
  */
 LIBDY_API dy_buildstring_t *dy_buildstring_append(dy_buildstring_t *bs, const char *part, size_t size);
 
@@ -89,7 +92,7 @@ LIBDY_API dy_buildstring_t *dy_buildstring_append(dy_buildstring_t *bs, const ch
  * @param bs The string builder
  * @param fmt The format string
  * @return NULL on failure
- * NOTE: This will copy all input into a new buffer owned by the string builder
+ * @attention This will copy all input into a new buffer owned by the string builder
  */
 LIBDY_API dy_buildstring_t *dy_buildstring_printf(dy_buildstring_t *bs, const char *fmt, ...);
 
@@ -100,7 +103,7 @@ LIBDY_API dy_buildstring_t *dy_buildstring_printf(dy_buildstring_t *bs, const ch
  * @param part The part
  * @param size The part size
  * @return NULL if allocation failed
- * NOTE: The part content is not copied, so it needs to outlive the string builder
+ * @attention The part content is not copied, so it needs to outlive the string builder
  */
 LIBDY_API dy_buildstring_t *dy_buildstring_more(dy_buildstring_t **bs, const char *part, size_t size);
 
@@ -116,24 +119,26 @@ LIBDY_API size_t dy_buildstring_size(dy_buildstring_t *bs);
  * @param dest The destination buffer
  * @param bs The string builder
  * @return The number of bytes copied
- * NOTE: you probably want to add a \0 to the end of the buffer:
- *  size_t size = dy_buildstring_copy(buf, bs, buf_size - 1);
- *  buf[size] = 0;
+ * @attention You probably want to add a \0 to the end of the buffer:
+ *  @code size_t size = dy_buildstring_copy(buf, bs, buf_size - 1);
+ *  buf[size] = 0;@endcode
  */
 LIBDY_API size_t dy_buildstring_copy(char *dest, dy_buildstring_t *bs, size_t space);
 
 /**
  * @brief Free a string builder
  * @param bs The string builder
- * NOTE: This doesn't free the actual content.
+ * @note Content isn't free'd unless free_part is set!
  */
 LIBDY_API void dy_buildstring_free(dy_buildstring_t *bs);
 
 /**
  * @brief Free a string builder and all content without a defined free_part
  * @param bs The string builder
- * @param free The memory free function (usually free())
+ * @param free The default memory free function (usually free())
  * @sa dy_buildstring_free
+ * @attention DO NOT USE UNLESS YOU KNOW WHAT YOU'RE DOING!
+ *  Read the warning in the header description!
  */
 LIBDY_API void dy_buildstring_free_content(dy_buildstring_t *bs, void(*free)(void*));
 
@@ -145,7 +150,7 @@ LIBDY_API void dy_buildstring_free_content(dy_buildstring_t *bs, void(*free)(voi
  * @brief Create a libdy string from a string builder
  * @param bs The string builder
  * @return A new DyObject or NULL on failure.
- * NOTE: Sets exception on failure
+ * @note Sets exception on failure
  */
 LIBDY_API DyObject *dy_buildstring_build(dy_buildstring_t *bs);
 
@@ -154,8 +159,8 @@ LIBDY_API DyObject *dy_buildstring_build(dy_buildstring_t *bs);
  * @param bs The string builder
  * @param s The string
  * @return NULL on failure
- * NOTE: The string builder will keep a reference to the string!
- * NOTE: Sets exception on failure
+ * @note The string builder will keep a reference to the string!
+ * @note Sets exception on failure
  */
 LIBDY_API dy_buildstring_t *dy_buildstring_append2(dy_buildstring_t *bs, DyObject *s);
 
@@ -164,7 +169,7 @@ LIBDY_API dy_buildstring_t *dy_buildstring_append2(dy_buildstring_t *bs, DyObjec
  * @param bs The string builder
  * @param obj The libdy object
  * @return NULL on failure
- * NOTE: Sets exception on failure
+ * @note Sets exception on failure
  */
 LIBDY_API dy_buildstring_t *dy_buildstring_repr(dy_buildstring_t *bs, DyObject *obj);
 

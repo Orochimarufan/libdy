@@ -6,4 +6,5 @@ Makefile
 .lock-*
 __pycache__
 *.layout
+/.waf*
 

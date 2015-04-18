@@ -12,15 +12,28 @@ headers = (
 )
 
 public_headers = (
-    "dy.h",
-    "dy_error.h",
-    "dy_string.h",
-    "dy_host.h",
-    "dy_callable.h",
-    "dy_buildstring.h",
-    "dyj.h",
-    "json.h",
+    "config.h",
+    "runtime.h",
+
+    # Utilities
+    "buildstring.h",
+    "json_token.h",
     "linalloc.h",
+    
+    # Objects
+    "types.h",
+    "object.h",
+    "constants.h",
+    "numbers.h",
+    "dystring.h",
+    "collections.h",
+    "json.h"
+    
+    # Exceptions
+    "exceptions.h",
+    "exceptions_c.h",
+    
+    "dy.h",
 )
 
 sources = (
@@ -43,10 +56,18 @@ sources = (
 # Build
 def options(opt):
     opt.load("compiler_c")
+    opt.load("doxygen")
+    
+    opt.add_option("-D", "--no-docs", action="store_true",
+        help="Don't build the Doxygen documentation")
 
 
 def configure(cnf):
     cnf.load("compiler_c")
+    cnf.load("doxygen")
+    
+    if cnf.options.no_docs:
+        cnf.env.NO_DOXYGEN="1"
 
     #cnf.write_config_header("config.h")
 
@@ -57,7 +78,13 @@ def build(bld):
     	target="dy",
 
     	includes=["."],
-    	defines=["__LIBDY_LIBRARY"],
+    	defines=["BUILDING_LIBDY_CORE"],
     	cflags=["-std=c11", "-fvisibility=hidden"],
         linkflags=["-lm"], #// TODO: maybe inline?
     )
+    
+    if bld.env.DOXYGEN and not bld.env.NO_DOXYGEN:
+        bld(features="doxygen",
+            doxyfile="Doxyfile",
+            pars={"PROJECT_NUMBER": "%s+%s" % ("dev", bld.git_rev)}
+        )

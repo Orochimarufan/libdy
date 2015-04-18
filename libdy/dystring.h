@@ -16,13 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 /**
  * @file libdy/dystring.h
  * @brief String interfaces
- * FIXME: should be called string.h, but clashes with std C <string.h>
+ * @todo should be called string.h, but clashes with std C <string.h>
  */
+
+#pragma once
 
 #include "types.h"
 #include "config.h"
@@ -37,8 +37,9 @@ extern "C" {
 #endif
 
 // ----------------------------------------------------------------------------
-// Strings
-// strings are UTF-8 encoded.
+///@{
+///@name Strings
+///@brief libdy strings are UTF-8 encoded, immutable character sequences.
 LIBDY_API bool DyString_Check(DyObject *obj);
 
 /**
@@ -46,7 +47,6 @@ LIBDY_API bool DyString_Check(DyObject *obj);
  * @param data The character data
  * @param size The string size
  * @return New reference to a string object
- * @sa dy_string.h
  * @sa DyString_InternStringFromStringAndSize
  */
 LIBDY_API DyObject *DyString_FromStringAndSize(const char *data, size_t size);
@@ -81,8 +81,11 @@ static inline DyObject *DyString_FromString(const char *cstr)
 LIBDY_API const char *DyString_AsString(DyObject *self);
 
 
+///@}
 // ----------------------------------------------------------------------------
-// String Interning
+///@{
+///@name String Interning
+///@brief libdy supports interned strings through a hash lookup table.
 /**
  * @brief Check if a string object is interned and return the interned instance
  * @param str The string object to check for

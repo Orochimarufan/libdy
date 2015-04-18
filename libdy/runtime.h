@@ -16,19 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "types.h"
-#include "config.h"
-
-#include <stdlib.h>
-
 /**
- * @file dy_host.h
+ * @file runtime.h
  * @brief Managing libdy internals
  *
  * These functions can be used to modify libdy behaviour like hash functions
@@ -39,6 +28,21 @@ extern "C" {
  *  objects WILL cause A LOT OF PROBLEMS. DON'T DO IT!
  */
 
+#pragma once
+
+#include "types.h"
+#include "config.h"
+
+#include <stdlib.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// ----------------------------------------------------------------------------
+///@{
+///@name String Hashing
 typedef Dy_hash_t (*Dy_string_hash_fn)(const char *data, size_t length);
 
 /**
@@ -49,11 +53,16 @@ typedef Dy_hash_t (*Dy_string_hash_fn)(const char *data, size_t length);
  */
 LIBDY_API void DyHost_SetHashFunc(Dy_string_hash_fn func);
 
-// Predefined hash functions:
+///@{
+///@name Predefined hash functions:
 LIBDY_API Dy_hash_t Dy_hash_fnv1(const char *data, size_t length);
 LIBDY_API Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length);
+///@}
 
-// Memory management
+///@}
+// ----------------------------------------------------------------------------
+///@{
+///@name Memory management
 typedef void*(*Dy_malloc_fn)(size_t);
 typedef void(*Dy_free_fn)(void*);
 typedef void*(*Dy_realloc_fn)(void*, size_t);
@@ -70,6 +79,7 @@ typedef struct Dy_MemoryManager_t {
  */
 LIBDY_API void DyHost_SetMemoryManager(Dy_MemoryManager_t mm);
 
+///@}
 #ifdef __cplusplus
 }
 #endif

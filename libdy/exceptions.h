@@ -16,12 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 /**
  * @file libdy/exceptions.h
  * @brief libdy Exceptions
  */
+
+#pragma once
 
 #include "types.h"
 #include "config.h"
@@ -35,7 +35,7 @@ extern "C" {
 /**
  * @file libdy/exceptions.h
  * @brief Error handling code
- * Note: error state is stored per-thread.
+ * @note error state is stored per-thread.
  */
 
 // Error IDs
@@ -57,8 +57,9 @@ LIBDY_API DyObject *  DyErr_Occurred();
 
 /**
  * @brief Clear the current error state
- * NOTE: this will release the global reference to the Exception object.
- * Make sure to take a reference to the borrowed return value of DyErr_Occurred() before calling this.
+ * @note this will release the global reference to the Exception object.
+ * @attention Make sure to take a reference to the borrowed return value of
+ * DyErr_Occurred() before calling this if you intend to keep the Exception object.
  */
 LIBDY_API void        DyErr_Clear();
 
@@ -96,7 +97,7 @@ LIBDY_API DyObject *    DyErr_Format(const char *errid, const char *format, ...)
  * @param exception The Exception object
  * @return exception
  * @sa DyErr_DiscardAndSetObject
- * NOTE: The exception's cause will be set by this function
+ * @note The exception's cause will be set by this function
  */
 LIBDY_API DyObject *  DyErr_SetObject(DyObject *exception);
 
@@ -105,7 +106,7 @@ LIBDY_API DyObject *  DyErr_SetObject(DyObject *exception);
  * @param exception The Exception object
  * @return exception
  * @sa DyErr_SetObject
- * NOTE: Compared to DyErr_SetObject, the cause will be left untouched.
+ * @note Compared to DyErr_SetObject, the cause will be left untouched.
  */
 LIBDY_API DyObject *  DyErr_DiscardAndSetObject(DyObject *exception);
 
@@ -127,7 +128,9 @@ LIBDY_API DyObject *  DyErr_SetArgumentTypeError(const char *fname, int arg, con
  * @param expected The expected type
  * @param got The received argument
  * @return NULL on success | an Exception object on failure
- * The thread error state will be set.
+ * @sa DyErr_SetArgumentTypeError
+ *
+ * Throws an ArgumentTypeError if the type of \c got is not \c expected.
  */
 LIBDY_API DyObject *  DyErr_CheckArg(const char *fname, int arg, DyObject_Type expected, DyObject *got);
 
@@ -135,7 +138,7 @@ LIBDY_API DyObject *  DyErr_CheckArg(const char *fname, int arg, DyObject_Type e
 /**
  * @brief Throw a Out of Memory Exception
  * @return The exception object
- * Use this instead of throwing a new one as it uses a static Exception object.
+ * @attention Use this to throw MemoryError as it uses a static Exception object.
  * This prevents running out of memory while creating the Exception.
  */
 LIBDY_API DyObject *    DyErr_SetMemoryError();
@@ -146,7 +149,7 @@ LIBDY_API DyObject *    DyErr_SetMemoryError();
  * @param exception The exception object
  * @param errid The errid to check
  * @return whether the exception is applicable. false if \c exception was NULL or isn't an Exception object
- * "applicable" means that either the errids match, or the exception errid starts with "<errid>."
+ * @note "applicable" means that either the errids match, or the exception errid starts with "<errid>."
  * Which means: "dy.TypeError" matches "dy.TypeError" as well as "dy.TypeError.ArgumentError"
  */
 LIBDY_API bool        DyErr_Filter(DyObject *exception, const char *errid);
@@ -155,7 +158,7 @@ LIBDY_API bool        DyErr_Filter(DyObject *exception, const char *errid);
  * @brief Retrieve the error id
  * @param self The Exception object
  * @return The error id
- * NOTE: The returned buffer is owned by the Exception object.
+ * @note The returned buffer is owned by the Exception object.
  */
 LIBDY_API const char *DyErr_ErrId(DyObject *self);
 
@@ -170,7 +173,8 @@ LIBDY_API const char *DyErr_Message(DyObject *self);
  * @brief Retrieve an exception's cause
  * @param self The Exception object
  * @return A borrowed reference to the cause or NULL if there is none
- * The Exception cause is any other exception that was propagating while this one was thrown.
+ *
+ * The Exception cause is any other exception that was active while this one was thrown.
  */
 LIBDY_API DyObject *  DyErr_Cause(DyObject *self);
 

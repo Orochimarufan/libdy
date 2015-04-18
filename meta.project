@@ -61,5 +61,6 @@
   <Dependencies Name="Debug"/>
   <VirtualDirectory Name="local_waflib">
     <File Name="local_waflib/local_rpath.py"/>
+    <File Name="local_waflib/doxygen.py"/>
   </VirtualDirectory>
 </CodeLite_Project>

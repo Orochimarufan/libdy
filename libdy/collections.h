@@ -16,6 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file collections.h
+ * @brief Item collections (list, dict)
+ *
+ * libdy provides 2 types of collections: lists and dictionaries (mappings)
+ */
+
 #pragma once
 
 #include "types.h"
@@ -29,7 +36,8 @@ extern "C" {
 #endif
 
 // ----------------------------------------------------------------------------
-// Lists
+///@{
+///@name Lists
 LIBDY_API bool DyList_Check(DyObject *obj);
 
 /**
@@ -71,8 +79,10 @@ LIBDY_API bool      DyList_Insert(DyObject *self, ssize_t where, DyObject *value
  */
 LIBDY_API bool      DyList_Append(DyObject *self, DyObject *value);
 
+///@}
 // ----------------------------------------------------------------------------
-// Dictionaries
+///@{
+///@name Dictionaries
 LIBDY_API bool      DyDict_Check(DyObject *obj);
 
 /**
@@ -96,14 +106,17 @@ LIBDY_API DyObject *DyDict_NewWithParent(DyObject *parent);
  */
 LIBDY_API bool      DyDict_Clear(DyObject *self);
 
+///@}
 // ----------------------------------------------------------------------------
-// Item subscription interface
+///@{
+///@name Subscription
+///@brief Item subscription interface
 /**
  * @brief Retrieve an index from an object/list
  * @param self The object
  * @param key The key
  * @return A borrowed reference to the object stored in \c self for \c key
- * Throws [dy.KeyError] when \c key isn't in \c self
+ * @throw [dy.KeyError] when \c key isn't in \c self
  */
 LIBDY_API DyObject *Dy_GetItem(DyObject *self, DyObject *key);
 LIBDY_API DyObject *Dy_GetItemString(DyObject *self, const char *key);
@@ -125,7 +138,6 @@ LIBDY_API DyObject *Dy_GetItemLongD(DyObject *self, long key, DyObject *def);
  * @param self The subscriptable object
  * @param key The key to look up
  * @return A borrowed reference to the object || Dy_Undefined
- * Short for Dy_GetItemD(self, key, Dy_Undefined)
  */
 LIBDY_API DyObject *Dy_GetItemU(DyObject *self, DyObject *key);
 LIBDY_API DyObject *Dy_GetItemStringU(DyObject *self, const char *key);
@@ -136,8 +148,8 @@ LIBDY_API DyObject *Dy_GetItemLongU(DyObject *self, long key);
  * @param self The object
  * @param key The key
  * @param value the new value
- * @return 
- * If value is NULL, delete the key instead
+ * @return Whether the operation succeeded
+ * @remark If \c value is NULL, \c key is deleted instead
  */
 LIBDY_API bool      Dy_SetItem(DyObject *self, DyObject *key, DyObject *value);
 LIBDY_API bool      Dy_SetItemString(DyObject *self, const char *key, DyObject *value);
@@ -148,11 +160,13 @@ LIBDY_API bool      Dy_SetItemLong(DyObject *self, long key, DyObject *value);
  * @param self The object
  * @param key The key
  * @return whether \c key exists in \c self
- * NOTIMPLEMENTED
+ * @attention Not Implemented
  */
 LIBDY_API bool      Dy_Contains(DyObject *self, DyObject *key);
 LIBDY_API bool      Dy_ContainsString(DyObject *self, const char *key);
 LIBDY_API bool      Dy_ContainsLong(DyObject *self, long key);
+
+///@}
 
 #ifdef __cplusplus
 }

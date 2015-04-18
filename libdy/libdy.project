@@ -62,6 +62,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
+    <File Name="Doxyfile"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
     <GlobalSettings>

@@ -16,23 +16,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 /**
  * @file libdy/types.h
  * @brief Type definitions for common libdy types
  */
+
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // ----------------------------------------------------------------------------
-// DyObject struct
+/// Opaque DyObject struct
 typedef struct _DyObject DyObject;
 
 // ----------------------------------------------------------------------------
-// Types
+/// DyObject Types
 typedef enum _DyObject_Type
 {
     DY_INVALID = -1,
@@ -48,7 +48,7 @@ typedef enum _DyObject_Type
 } DyObject_Type;
 
 // ----------------------------------------------------------------------------
-// Hash
+/// Hash type
 typedef long Dy_hash_t;
 
 #ifdef __cplusplus
