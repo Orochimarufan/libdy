@@ -18,7 +18,7 @@
 
 #include <Python.h>
 #include <libdy/dy.h>
-#include <libdy/dy_error.h>
+#include <libdy/exceptions.h>
 #include "pydy.h"
 
 static PyObject *DyError;

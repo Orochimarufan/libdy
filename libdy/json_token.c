@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dyj.h"
+#include "json_token.h"
 
 #include <math.h>
 #include <string.h>

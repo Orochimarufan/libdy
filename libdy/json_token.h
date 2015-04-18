@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "config.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -43,7 +45,7 @@ typedef enum dyj_token_type {
     TOKEN_SPACE,
 } dyj_token_type;
 
-extern const char *dyj_token_names[];
+extern LIBDY_API const char *dyj_token_names[];
 
 typedef struct dyj_token_location {
     size_t offset;
@@ -82,8 +84,8 @@ typedef struct dyj_token_t {
  * @param token The token
  * @param buffer A pointer to the start of the json data
  */
-void dyj_init_token(dyj_token_t *token,
-                    const char *buffer);
+LIBDY_API void dyj_init_token(dyj_token_t *token,
+                              const char *buffer);
 
 /**
  * @brief Initialize the token structure
@@ -93,18 +95,18 @@ void dyj_init_token(dyj_token_t *token,
  * @param line The initial line number
  * @param column The initial column
  */
-void dyj_init_token_ex(dyj_token_t *token,
-                       const char *buffer,
-                       size_t offset,
-                       size_t line,
-                       size_t column);
+LIBDY_API void dyj_init_token_ex(dyj_token_t *token,
+                                 const char *buffer,
+                                 size_t offset,
+                                 size_t line,
+                                 size_t column);
 
 /**
  * @brief Get the next token
  * @param token The token structure
  * @return false if it failed, setting a message in token->error
  */
-bool dyj_next_token(dyj_token_t *token);
+LIBDY_API bool dyj_next_token(dyj_token_t *token);
 
 
 // -----------------------------------------------------------------------------
@@ -114,7 +116,7 @@ bool dyj_next_token(dyj_token_t *token);
  * @brief special value for token->error
  * Indicates that the chunk sentinel ETX was reached
  */
-extern const char *dyj_chunk_end;
+extern LIBDY_API const char *dyj_chunk_end;
 
 /**
  * @brief Continue parsing in a new chunk.
@@ -127,8 +129,8 @@ extern const char *dyj_chunk_end;
  * You can copy the remaining data from token->end or read it from your source
  *  starting at token->end_location.offset
  */
-void dyj_next_chunk(dyj_token_t *token,
-                    const char *buffer);
+LIBDY_API void dyj_next_chunk(dyj_token_t *token,
+                              const char *buffer);
 
 
 // -----------------------------------------------------------------------------
@@ -157,10 +159,20 @@ typedef struct dyj_string_token_t {
     size_t error_offset;
 } dyj_string_token_t;
 
-void dyj_init_string(dyj_string_token_t *strtok,
-                     dyj_token_t *token);
+/**
+ * @brief Initialize a JSON string token
+ * @param strtok The string token
+ * @param token A string-type JSON token
+ */
+LIBDY_API void dyj_init_string(dyj_string_token_t *strtok,
+                               dyj_token_t *token);
 
-bool dyj_next_string(dyj_string_token_t *strtok);
+/**
+ * @brief Get the next JSON string token
+ * @param strtok The string token
+ * @return Whether the operation succeeded
+ */
+LIBDY_API bool dyj_next_string(dyj_string_token_t *strtok);
 
 /**
  * @brief Convert an Unicode codepoint to utf8 bytes
@@ -169,4 +181,4 @@ bool dyj_next_string(dyj_string_token_t *strtok);
  * @return the number of bytes written
  * Writes the utf8 code units for \c codepoint to \c utf8
  */
-int dyj_unicode_utf8(uint32_t codepoint, uint8_t *utf8);
+LIBDY_API int dyj_unicode_utf8(uint32_t codepoint, uint8_t *utf8);

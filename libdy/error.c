@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dy_error.h"
+#include "exceptions.h"
 #include "dy_p.h"
 
 #include <stdlib.h>

@@ -18,24 +18,77 @@
 
 #pragma once
 
+/**
+ * @file libdy/dystring.h
+ * @brief String interfaces
+ * FIXME: should be called string.h, but clashes with std C <string.h>
+ */
+
+#include "types.h"
+#include "config.h"
+#include "object.h"
+
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "dy.h"
+// ----------------------------------------------------------------------------
+// Strings
+// strings are UTF-8 encoded.
+LIBDY_API bool DyString_Check(DyObject *obj);
 
 /**
- * @file dy_string.h
- * @brief Additional functions for working with string objects
+ * @brief Create a string object from a character array and size
+ * @param data The character data
+ * @param size The string size
+ * @return New reference to a string object
+ * @sa dy_string.h
+ * @sa DyString_InternStringFromStringAndSize
  */
+LIBDY_API DyObject *DyString_FromStringAndSize(const char *data, size_t size);
 
-// Intern
+/**
+ * @brief Create a string object from a NTBS
+ * @param cstr The null-terminated C string
+ * @return New reference to a string object
+ * @sa DyString_FromStringAndSize
+ * @sa DyString_InternStringFromString
+ */
+static inline DyObject *DyString_FromString(const char *cstr)
+{
+	return DyString_FromStringAndSize(cstr, strlen(cstr));
+}
+
+/**
+ * @brief Get a c-string copy of the string object
+ * @param self The string object
+ * @return a new NTBS buffer with the same contents as @param self
+ * NOTE: buffer must be freed with free()
+ */
+//char *DyString_GetString(DyObject *self);
+
+/**
+ * @brief Get the buffer behind a string object
+ * @param self The string object
+ * @return A readonly character buffer
+ * @sa DyString_GetString
+ * @sa DyString_Size
+ */
+LIBDY_API const char *DyString_AsString(DyObject *self);
+
+
+// ----------------------------------------------------------------------------
+// String Interning
 /**
  * @brief Check if a string object is interned and return the interned instance
  * @param str The string object to check for
  * @return Borrowed reference to the interned string object or NULL, if this string value isnt interned
  */
-DyObject *DyString_Interned(DyObject *str);
+LIBDY_API DyObject *DyString_Interned(DyObject *str);
 
 /**
  * @brief Check if a string is interned and return the interned object
@@ -43,7 +96,7 @@ DyObject *DyString_Interned(DyObject *str);
  * @return Borrowed reference to the interned string object or NULL
  * @sa DyString_Interned
  */
-DyObject *DyString_InternedString(const char *cstr);
+LIBDY_API DyObject *DyString_InternedString(const char *cstr);
 
 /**
  * @brief Intern a string object or return the interned instance
@@ -53,13 +106,13 @@ DyObject *DyString_InternedString(const char *cstr);
  *  and the interned instance is not retained either. (Refcounts are untouched.)
  * @sa DyString_InternInplace to handle replacement refcounting
  */
-DyObject *DyString_Intern(DyObject *str);
+LIBDY_API DyObject *DyString_Intern(DyObject *str);
 
 /**
  * @brief Intern a string object and put the result back
  * @param strp Reference to a string object pointer.
  */
-inline void DyString_InternInplace(DyObject **strp)
+static inline void DyString_InternInplace(DyObject **strp)
 {
     DyObject *interned = DyString_Intern(*strp);
     if (interned != *strp)
@@ -77,7 +130,7 @@ inline void DyString_InternInplace(DyObject **strp)
  * @return New reference to a string object
  * @sa DyString_FromStringAndSize
  */
-DyObject *DyString_InternStringFromStringAndSize(const char *data, size_t size);
+LIBDY_API DyObject *DyString_InternStringFromStringAndSize(const char *data, size_t size);
 
 /**
  * @brief Create an interned string object from a NTBS
@@ -85,7 +138,7 @@ DyObject *DyString_InternStringFromStringAndSize(const char *data, size_t size);
  * @return New reference to a string object
  * @sa DyString_FromString
  */
-inline DyObject *DyString_InternStringFromString(const char *cstr)
+static inline DyObject *DyString_InternStringFromString(const char *cstr)
 {
     return DyString_InternStringFromStringAndSize(cstr, strlen(cstr));
 }

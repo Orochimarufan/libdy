@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "dy_host.h"
+#include "runtime.h"
 
 extern struct _DyHost {
     // Strings

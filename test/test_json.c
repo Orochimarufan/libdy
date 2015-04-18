@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libdy/dyj.h>
+#include <libdy/json_token.h>
 #include <libdy/json.h>
 #include <libdy/dy.h>
-#include <libdy/dy_error.h>
+#include <libdy/exceptions.h>
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -38,7 +38,7 @@ int tokentest(const char *json)
     {
         if (!dyj_next_token(&t))
         {
-            printf("ERROR: %s\n\tAt line %d, column %d\n", t.error,
+            printf("ERROR: %s\n\tAt line %zu, column %zu\n", t.error,
                    t.error_location.line, t.error_location.column);
             return 1;
         }
@@ -55,7 +55,7 @@ int tokentest(const char *json)
                 {
                     if (!dyj_next_string(&st))
                     {
-                        printf("\nERROR: %s\n\tapprox. at column %d\n", st.error, t.location.column + st.error_offset);
+                        printf("\nERROR: %s\n\tapprox. at column %zu\n", st.error, t.location.column + st.error_offset);
                         return 1;
                     }
 

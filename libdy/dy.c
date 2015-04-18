@@ -21,9 +21,10 @@
 #include "dict_p.h"
 #include "list_p.h"
 #include "callable_p.h"
-#include "dy_error.h"
-#include "dy_string.h"
-#include "dy_buildstring.h"
+#include "exceptions.h"
+#include "dystring.h"
+#include "buildstring.h"
+#include "dy.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -65,7 +66,10 @@ typedef struct _DyIntegral_Object {
     int64_t value;
 } DyIntegral_Object;
 
-bool DyLong_Check(DyObject *self);
+bool DyLong_Check(DyObject *self)
+{
+    return self->type == DY_LONG;
+}
 
 DyObject *DyLong_New(int64_t value)
 {
@@ -98,7 +102,10 @@ typedef struct _DyFloating_Object {
     double value;
 } DyFloating_Object;
 
-bool DyFloat_Check(DyObject *self);
+bool DyFloat_Check(DyObject *self)
+{
+    return self->type == DY_FLOAT;
+}
 
 DyObject *DyFloat_New(double value)
 {

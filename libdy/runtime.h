@@ -22,7 +22,8 @@
 extern "C" {
 #endif
 
-#include "dy.h"
+#include "types.h"
+#include "config.h"
 
 #include <stdlib.h>
 
@@ -46,11 +47,11 @@ typedef Dy_hash_t (*Dy_string_hash_fn)(const char *data, size_t length);
  * This must be done before using ANY libdy objects, as it modifies
  * behavior of string and mapping objects.
  */
-void DyHost_SetHashFunc(Dy_string_hash_fn func);
+LIBDY_API void DyHost_SetHashFunc(Dy_string_hash_fn func);
 
 // Predefined hash functions:
-Dy_hash_t Dy_hash_fnv1(const char *data, size_t length);
-Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length);
+LIBDY_API Dy_hash_t Dy_hash_fnv1(const char *data, size_t length);
+LIBDY_API Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length);
 
 // Memory management
 typedef void*(*Dy_malloc_fn)(size_t);
@@ -63,7 +64,11 @@ typedef struct Dy_MemoryManager_t {
     Dy_realloc_fn realloc;
 } Dy_MemoryManager_t;
 
-void DyHost_SetMemoryManager(Dy_MemoryManager_t mm);
+/**
+ * @brief Set a memory manager for libdy to use.
+ * @param mm The memory manager
+ */
+LIBDY_API void DyHost_SetMemoryManager(Dy_MemoryManager_t mm);
 
 #ifdef __cplusplus
 }

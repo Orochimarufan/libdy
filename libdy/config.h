@@ -18,22 +18,18 @@
 
 #pragma once
 
-#include "userdata.h"
-#include "dy_p.h"
-
-
-#define DCD_NODATA 0
-#define DCD_HASDATA 1
-
-#define DCT_NOARG 0
-#define DCT_SIMPLE 1
-#define DCT_ARGLIST 10
-
-
-typedef struct _DyCallableObject {
-    DyObject_HEAD
-    uint8_t flags; // "type" is already in use in the base DyObject!
-    DyObject *(*function)();
-    void *data;
-} DyCallableObject;
-
+// ----------------------------------------------------------------------------
+// API macros
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef BUILDING_LIBDY_CORE
+	#define LIBDY_API __declspec(dllexport)
+  #else
+	#define LIBDY_API __declspec(dllimport)
+  #endif
+#else
+  #if __GNUC__ >= 4
+    #define LIBDY_API __attribute__ ((visibility ("default")))
+  #else
+    #define LIBDY_API
+  #endif
+#endif

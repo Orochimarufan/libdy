@@ -18,29 +18,38 @@
 
 #pragma once
 
-#include "dy_defs.h"
+/**
+ * @file libdy/numbers.h
+ * @brief libdy numerical (int/float) objects
+ */
+ 
+ #include "types.h"
+ #include "config.h"
+ 
+ #include <stdbool.h>
+ #include <stdint.h>
+ 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef DyObject *(*DyNoArgFn)();
-typedef DyObject *(*DyNoArgFnWithData)(void *data);
+// ----------------------------------------------------------------------------
+// Integers
+LIBDY_API bool DyLong_Check(DyObject *obj);
 
-typedef DyObject *(*DySimpleFn)(DyObject *arg);
-typedef DyObject *(*DyArgListFnWithData)(DyObject *arglist, void *data);
+LIBDY_API DyObject *DyLong_New(int64_t value);
 
-typedef DyObject *(*DyArgListFn)(DyObject *arglist);
-typedef DyObject *(*DySimpleFnWithData)(DyObject *arg, void *data);
+LIBDY_API int64_t DyLong_Get(DyObject *self);
 
-DyObject *DyCall_CreateNoArg(DyNoArgFn fn);
-DyObject *DyCall_CreateNoArgWithData(DyNoArgFnWithData fn, void *data);
+// ----------------------------------------------------------------------------
+// Floats
+LIBDY_API bool DyFloat_Check(DyObject *obj);
 
-DyObject *DyCall_CreateSimple(DySimpleFn fn);
-DyObject *DyCall_CreateSimpleWithData(DySimpleFnWithData fn, void *data);
+LIBDY_API DyObject *DyFloat_New(double value);
 
-DyObject *DyCall_Create(DyArgListFn fn);
-DyObject *DyCall_CreateWithData(DyArgListFnWithData fn, void *data);
+LIBDY_API double DyFloat_Get(DyObject *self);
+
 
 #ifdef __cplusplus
 }

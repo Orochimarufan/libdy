@@ -56,9 +56,10 @@
   </Settings>
   <VirtualDirectory Name="waf">
     <File Name="wscript"/>
+    <File Name="waf"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
-  <VirtualDirectory Name="waflib">
-    <File Name="waf/local_rpath.py"/>
+  <VirtualDirectory Name="local_waflib">
+    <File Name="local_waflib/local_rpath.py"/>
   </VirtualDirectory>
 </CodeLite_Project>

@@ -18,7 +18,7 @@
 
 #include "callable_p.h"
 #include "dy.h"
-#include "dy_error.h"
+#include "exceptions.h"
 
 #include <assert.h>
 

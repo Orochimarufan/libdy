@@ -17,8 +17,8 @@
  */
 
 #include "libdy/dy.h"
-#include "libdy/dy_error.h"
-#include "libdy/dy_callable.h"
+#include "libdy/exceptions.h"
+#include "libdy/userdata.h"
 
 #include <stdio.h>
 

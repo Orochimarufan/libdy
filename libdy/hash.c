@@ -18,6 +18,8 @@
 
 #include "host_p.h"
 
+#include <stdint.h>
+
 // --[ Hash implementations ]--
 // Murmur
 static inline uint32_t rotl32 ( uint32_t x, int8_t r )

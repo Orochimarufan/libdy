@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include "dy_defs.h"
+#include "types.h"
+#include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,20 +37,30 @@ typedef void(*DyJson_NextChunkFn_t)(struct dyj_token_t *token, void *data);
 
 /**
  * @brief Parse json from a Token stream
- * @param token The token stream
+ * @param token The first token in the stream
+ * @param next_chunk A function to get the next input chunk
+ * @param next_chunk_data Data pointer passed to next_chunk()
+ * @return A new DyObject reference
+ * @sa DyJson_NextEx
+ * @sa DyJson_Parse
+ */
+LIBDY_API DyObject *DyJson_ThisEx(struct dyj_token_t *token,
+						          DyJson_NextChunkFn_t next_chunk,
+								  void *next_chunk_data);
+
+/**
+ * @brief Parse json from a Token stream
+ * @param token A stream pointing _before_ the first token
  * @param next_chunk A function to get the next input chunk
  * @param next_chunk_data Data pointer passed to next_chunk()
  * @return A new DyObject reference
  * @sa dyj_next_chunk
+ * @sa DyJson_ThisEx
  * @sa DyJson_Parse
  */
-DyObject *DyJson_ThisEx(struct dyj_token_t *token,
-                        DyJson_NextChunkFn_t next_chunk,
-                        void *next_chunk_data);
-
-DyObject *DyJson_NextEx(struct dyj_token_t *token,
-                        DyJson_NextChunkFn_t next_chunk,
-                        void *next_chunk_data);
+LIBDY_API DyObject *DyJson_NextEx(struct dyj_token_t *token,
+                                  DyJson_NextChunkFn_t next_chunk,
+                                  void *next_chunk_data);
 
 /**
  * @brief Parse a json buffer into a DyObject
@@ -57,7 +68,7 @@ DyObject *DyJson_NextEx(struct dyj_token_t *token,
  * @return A new DyObject reference
  * @sa DyJson_ParseEx
  */
-DyObject *DyJson_Parse(const char *json);
+LIBDY_API DyObject *DyJson_Parse(const char *json);
 
 
 #ifdef __cplusplus

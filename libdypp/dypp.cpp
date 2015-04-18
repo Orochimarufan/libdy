@@ -18,7 +18,7 @@
 
 #include "dypp.h"
 
-#include <libdy/dy_error.h>
+#include <libdy/exceptions.h>
 
 namespace Dy {
 

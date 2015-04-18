@@ -92,7 +92,7 @@
   <VirtualDirectory Name="libdypp">
     <File Name="dypp.cpp"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="include">
+  <VirtualDirectory Name="include/libdypp">
     <File Name="dypp.h"/>
     <File Name="dypp_conv.h"/>
     <File Name="dypp.impl.h"/>

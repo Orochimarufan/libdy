@@ -18,8 +18,8 @@
 
 #include "string_p.h"
 #include "host_p.h"
-#include "dy_error.h"
-#include "dy_string.h"
+#include "exceptions.h"
+#include "dystring.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +27,10 @@
 #include <strings.h>
 #include <stdio.h>
 
-// Inlines
-bool DyString_Check(DyObject *obj);
-DyObject *DyString_FromString(const char *cstr);
+bool DyString_Check(DyObject *obj)
+{
+    return obj->type == DY_STRING;
+}
 
 // Implementation
 DyStringObject *string_new_ex(size_t size)
@@ -121,7 +122,7 @@ DyObject *string_repr(DyStringObject *self)
 }
 
 // Repr ------------------------------------------------------------------------
-#include "dy_buildstring.h"
+#include "buildstring.h"
 
 dy_buildstring_t *string_bsrepr(dy_buildstring_t *bs, DyStringObject *self)
 {

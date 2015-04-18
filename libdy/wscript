@@ -48,7 +48,7 @@ def options(opt):
 def configure(cnf):
     cnf.load("compiler_c")
 
-    cnf.write_config_header("config.h")
+    #cnf.write_config_header("config.h")
 
 
 def build(bld):
@@ -58,6 +58,6 @@ def build(bld):
 
     	includes=["."],
     	defines=["__LIBDY_LIBRARY"],
-    	cflags=["-std=c11"],
+    	cflags=["-std=c11", "-fvisibility=hidden"],
         linkflags=["-lm"], #// TODO: maybe inline?
     )

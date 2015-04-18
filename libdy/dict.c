@@ -18,16 +18,18 @@
 
 #include "dict_p.h"
 #include "dy_p.h"
-#include "dy_error.h"
-#include "dy_string.h"
+#include "exceptions.h"
+#include "dystring.h"
 #include "host_p.h"
 #include "string_p.h"
 
 #include <stdio.h>
 
 
-// Inlines
-bool DyDict_Check(DyObject *);
+bool DyDict_Check(DyObject *self)
+{
+    return self->type == DY_DICT;
+}
 
 // Prototypes
 static bucket_t *find_bucket(DyDictObject *, DyObject *key, Dy_hash_t hash);
@@ -358,7 +360,7 @@ DyObject *dict_getitem(DyDictObject *self, DyObject *key)
 }
 
 // Repr ------------------------------------------------------------------------
-#include "dy_buildstring.h"
+#include "buildstring.h"
 
 dy_buildstring_t *dict_bsrepr(dy_buildstring_t *bs, DyDictObject *self)
 {
@@ -406,6 +408,11 @@ dy_buildstring_t *dict_bsrepr(dy_buildstring_t *bs, DyDictObject *self)
     {
         lbs->part = "}";
         lbs->part_size = 1;
+    }
+    else
+    {
+        lbs->part = "{}";
+        lbs->part_size = 2;
     }
 
     return lbs;

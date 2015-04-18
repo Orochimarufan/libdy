@@ -18,7 +18,33 @@
 
 #pragma once
 
-#include "dy_defs.h"
+/**
+ * @file libdy/buildstring.h
+ * @brief A string building utility.
+ * This is an API for incrementally building a string while avoiding copying
+ * the whole string around large anmounts of times.
+ * 
+ * This is achieved by keeping metadata about the parts that need to be con-
+ * catenated into the final string and only merging them when all is said
+ * and done.
+ * 
+ * The metadata overhead possibly poses a large overhead if it is used to create
+ * short strings.
+ * 
+ * The free_part property can be used to specify a deallocation callback.
+ * It gets called when the buildstring object gets freed with dy_buildstring_free()
+ * If all parts need the same deallocation procedure, dy_buildstring_free_content()
+ * can be used as a shortcut to setting the individual callbacks.
+ * NEVER use the latter when you don't have _full_ control over the buildstring
+ * instance. Note that that is already true when you call other functions operating
+ * on the buildstring that add parts you have no control over. It might cause
+ * you trying to free something that's not supposed to be freed (For example,
+ * a static variable) i.e only use dy_buildstring_append and dy_buildstring_printf
+ * if you intend to use dy_buildstring_free_content()
+ */
+
+#include "types.h"
+#include "config.h"
 
 #include <stdlib.h>
 
@@ -32,10 +58,10 @@ typedef void(*dy_buildstring_part_free_fn)(char*);
 
 // FIXME: make this private?
 typedef struct dy_buildstring_t {
-    const char *part;
-    size_t part_size;
-    dy_buildstring_part_free_fn free_part;
-    struct dy_buildstring_t *next;
+    const char *part;                       ///< The data this part refers to
+    size_t part_size;                       ///< The size of this part
+    dy_buildstring_part_free_fn free_part;  ///< An optional function to deallocate the part
+    struct dy_buildstring_t *next;          ///< A pointer to the next part
 } dy_buildstring_t;
 
 
@@ -46,7 +72,7 @@ typedef struct dy_buildstring_t {
  * @return A new string builder or NULL if allocation failed
  * NOTE: The part content is not copied, so it needs to outlive the string builder
  */
-dy_buildstring_t *dy_buildstring_new(const char *part, size_t size);
+LIBDY_API dy_buildstring_t *dy_buildstring_new(const char *part, size_t size);
 
 /**
  * @brief Append to a string builder
@@ -56,7 +82,7 @@ dy_buildstring_t *dy_buildstring_new(const char *part, size_t size);
  * @return NULL if allocation failed
  * NOTE: The part content is not copied, so it needs to outlive the string builder
  */
-dy_buildstring_t *dy_buildstring_append(dy_buildstring_t *bs, const char *part, size_t size);
+LIBDY_API dy_buildstring_t *dy_buildstring_append(dy_buildstring_t *bs, const char *part, size_t size);
 
 /**
  * @brief Append a sprintf-style format to the string builder
@@ -65,7 +91,7 @@ dy_buildstring_t *dy_buildstring_append(dy_buildstring_t *bs, const char *part, 
  * @return NULL on failure
  * NOTE: This will copy all input into a new buffer owned by the string builder
  */
-dy_buildstring_t *dy_buildstring_printf(dy_buildstring_t *bs, const char *fmt, ...);
+LIBDY_API dy_buildstring_t *dy_buildstring_printf(dy_buildstring_t *bs, const char *fmt, ...);
 
 
 /**
@@ -76,14 +102,14 @@ dy_buildstring_t *dy_buildstring_printf(dy_buildstring_t *bs, const char *fmt, .
  * @return NULL if allocation failed
  * NOTE: The part content is not copied, so it needs to outlive the string builder
  */
-dy_buildstring_t *dy_buildstring_more(dy_buildstring_t **bs, const char *part, size_t size);
+LIBDY_API dy_buildstring_t *dy_buildstring_more(dy_buildstring_t **bs, const char *part, size_t size);
 
 /**
  * @brief Retrieve the total size of a string builder
  * @param bs The string builder
  * @return It's total size
  */
-size_t dy_buildstring_size(dy_buildstring_t *bs);
+LIBDY_API size_t dy_buildstring_size(dy_buildstring_t *bs);
 
 /**
  * @brief Copy the string builder content to a character buffer
@@ -94,14 +120,14 @@ size_t dy_buildstring_size(dy_buildstring_t *bs);
  *  size_t size = dy_buildstring_copy(buf, bs, buf_size - 1);
  *  buf[size] = 0;
  */
-size_t dy_buildstring_copy(char *dest, dy_buildstring_t *bs, size_t space);
+LIBDY_API size_t dy_buildstring_copy(char *dest, dy_buildstring_t *bs, size_t space);
 
 /**
  * @brief Free a string builder
  * @param bs The string builder
  * NOTE: This doesn't free the actual content.
  */
-void dy_buildstring_free(dy_buildstring_t *bs);
+LIBDY_API void dy_buildstring_free(dy_buildstring_t *bs);
 
 /**
  * @brief Free a string builder and all content without a defined free_part
@@ -109,7 +135,7 @@ void dy_buildstring_free(dy_buildstring_t *bs);
  * @param free The memory free function (usually free())
  * @sa dy_buildstring_free
  */
-void dy_buildstring_free_content(dy_buildstring_t *bs, void(*free)(void*));
+LIBDY_API void dy_buildstring_free_content(dy_buildstring_t *bs, void(*free)(void*));
 
 
 // =============================================================================
@@ -121,7 +147,7 @@ void dy_buildstring_free_content(dy_buildstring_t *bs, void(*free)(void*));
  * @return A new DyObject or NULL on failure.
  * NOTE: Sets exception on failure
  */
-DyObject *dy_buildstring_build(dy_buildstring_t *bs);
+LIBDY_API DyObject *dy_buildstring_build(dy_buildstring_t *bs);
 
 /**
  * @brief Append a libdy string to the string builder
@@ -131,7 +157,7 @@ DyObject *dy_buildstring_build(dy_buildstring_t *bs);
  * NOTE: The string builder will keep a reference to the string!
  * NOTE: Sets exception on failure
  */
-dy_buildstring_t *dy_buildstring_append2(dy_buildstring_t *bs, DyObject *s);
+LIBDY_API dy_buildstring_t *dy_buildstring_append2(dy_buildstring_t *bs, DyObject *s);
 
 /**
  * @brief Append an object's representation to the string builder
@@ -140,7 +166,7 @@ dy_buildstring_t *dy_buildstring_append2(dy_buildstring_t *bs, DyObject *s);
  * @return NULL on failure
  * NOTE: Sets exception on failure
  */
-dy_buildstring_t *dy_buildstring_repr(dy_buildstring_t *bs, DyObject *obj);
+LIBDY_API dy_buildstring_t *dy_buildstring_repr(dy_buildstring_t *bs, DyObject *obj);
 
 #ifdef __cplusplus
 }

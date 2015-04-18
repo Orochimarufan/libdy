@@ -11,7 +11,7 @@ VERSION = "0.0.1"
 # Paths
 top = "."
 out = "build"
-path.insert(0, "waf")
+path.insert(0, "local_waflib")
 
 # Sub-Projects
 projects = "libdy", "libdypp", "test", "pydy"

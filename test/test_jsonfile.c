@@ -17,8 +17,8 @@
  */
 
 #include <libdy/dy.h>
-#include <libdy/dy_error.h>
-#include <libdy/dyj.h>
+#include <libdy/exceptions.h>
+#include <libdy/json_token.h>
 #include <libdy/json.h>
 
 #include <stdio.h>

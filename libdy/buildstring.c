@@ -16,8 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dy_buildstring.h"
-#include "dy.h"
+#include "buildstring.h"
+#include "object.h"
+#include "exceptions.h"
+
 #include "host_p.h"
 #include "string_p.h"
 
@@ -169,7 +171,7 @@ dy_buildstring_t *dy_buildstring_printf(dy_buildstring_t *bs, const char *fmt, .
 // DyString integration
 // -----------------------------------------------------------------------------
 #include "string_p.h"
-#include "dy_error.h"
+#include "exceptions.h"
 
 static void free_dystring(char *data)
 {

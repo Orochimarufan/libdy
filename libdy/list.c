@@ -17,12 +17,15 @@
  */
 
 #include "list_p.h"
-#include "dy_error.h"
+#include "exceptions.h"
 
 #include <assert.h>
 
 // Inlines
-bool DyList_Check(DyObject *);
+bool DyList_Check(DyObject *self)
+{
+    return self->type == DY_LIST;
+}
 
 // Modeled after cpython/Objects/listobject.c
 DyObject *DyList_New()
@@ -223,7 +226,7 @@ bool DyList_Clear(DyObject *self)
 
 
 // Repr ------------------------------------------------------------------------
-#include "dy_buildstring.h"
+#include "buildstring.h"
 
 dy_buildstring_t *list_bsrepr(dy_buildstring_t *bs, DyListObject *self)
 {

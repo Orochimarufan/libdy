@@ -19,11 +19,11 @@
 #include "json.h"
 
 #include "dy.h"
-#include "dyj.h"
-#include "dy_buildstring.h"
+#include "json_token.h"
+#include "buildstring.h"
 #include "linalloc.h"
 #include "host_p.h"
-#include "dy_error.h"
+#include "exceptions.h"
 #include "dy_p.h"
 
 #include <assert.h>

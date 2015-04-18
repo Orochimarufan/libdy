@@ -44,7 +44,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="testdy" IntermediateDirectory="./build" Command="/home/HOME/taeyeon/Development/libdy/build/test/testdypp" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="/home/HOME/taeyeon/Development/libdy/build" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="testdy" IntermediateDirectory="./build" Command="$(WorkspacePath)/build/test/testdy" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/build" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -56,9 +56,9 @@
       <PreBuild/>
       <PostBuild/>
       <CustomBuild Enabled="yes">
-        <RebuildCommand>waf clean build</RebuildCommand>
-        <CleanCommand>waf clean</CleanCommand>
-        <BuildCommand>waf build</BuildCommand>
+        <RebuildCommand>./waf clean build</RebuildCommand>
+        <CleanCommand>./waf clean</CleanCommand>
+        <BuildCommand>./waf build</BuildCommand>
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>

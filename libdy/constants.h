@@ -18,22 +18,35 @@
 
 #pragma once
 
-#include "userdata.h"
-#include "dy_p.h"
+/**
+ * @file libdy/constants.h
+ * @brief Constant objects
+ */
+ 
+ #include "types.h"
+ #include "config.h"
+ 
+ #include <stdbool.h>
+ 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// ----------------------------------------------------------------------------
+// Constant Objects
+extern LIBDY_API DyObject *Dy_Undefined;
+extern LIBDY_API DyObject *Dy_None;
+extern LIBDY_API DyObject *Dy_True;
+extern LIBDY_API DyObject *Dy_False;
+
+LIBDY_API bool DyUndefined_Check(DyObject *obj);
+
+LIBDY_API bool DyNone_Check(DyObject *obj);
+
+LIBDY_API bool DyBool_Check(DyObject *obj);
 
 
-#define DCD_NODATA 0
-#define DCD_HASDATA 1
-
-#define DCT_NOARG 0
-#define DCT_SIMPLE 1
-#define DCT_ARGLIST 10
-
-
-typedef struct _DyCallableObject {
-    DyObject_HEAD
-    uint8_t flags; // "type" is already in use in the base DyObject!
-    DyObject *(*function)();
-    void *data;
-} DyCallableObject;
-
+#ifdef __cplusplus
+}
+#endif

@@ -19,8 +19,8 @@
 #include "freelist_p.h"
 #include "string_p.h"
 #include "host_p.h"
-#include "dy_string.h"
-#include "dy_error.h"
+#include "dystring.h"
+#include "exceptions.h"
 
 #include <stdio.h>
 

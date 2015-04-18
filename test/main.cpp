@@ -21,7 +21,7 @@
 #include <functional>
 
 #include <libdypp/dypp.h>
-#include <libdy/dy_callable.h>
+#include <libdy/userdata.h>
 
 void Dy_Print(const Dy::Object &o)
 {

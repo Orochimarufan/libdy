@@ -18,6 +18,18 @@
 
 #pragma once
 
+/**
+ * @file libdy/linalloc.h
+ * @brief A simple linear allocator.
+ * Create a new pool using dy_linalloc_new(), passing it a parent allocator
+ * Then it can be used through dy_linalloc_malloc() and dy_linalloc_remaining()
+ * Finally, free the whole pool using the parent allocator's free()
+ * 
+ * This is mostly useful to store larger anmounts of temporary data.
+ */
+
+#include "config.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -35,7 +47,7 @@ typedef struct dy_linalloc_t dy_linalloc_t;
  * @param size The pool size
  * @return A new linear memory pool
  */
-dy_linalloc_t *dy_linalloc_new(size_t size, void*(*malloc)(size_t));
+LIBDY_API dy_linalloc_t *dy_linalloc_new(size_t size, void*(*malloc)(size_t));
 
 /**
  * @brief Allocate memory from the pool
@@ -43,14 +55,14 @@ dy_linalloc_t *dy_linalloc_new(size_t size, void*(*malloc)(size_t));
  * @param size The anmount of memory needed
  * @return A free chunk of memory
  */
-void *dy_linalloc_malloc(dy_linalloc_t *la, size_t size);
+LIBDY_API void *dy_linalloc_malloc(dy_linalloc_t *la, size_t size);
 
 /**
  * @brief Check how much memory is free in the pool
  * @param la The linalloc instance
  * @return The anmount of free memory in the pool
  */
-size_t dy_linalloc_remaining(dy_linalloc_t *la);
+LIBDY_API size_t dy_linalloc_remaining(dy_linalloc_t *la);
 
 
 #ifdef __cplusplus

@@ -18,6 +18,11 @@
 
 #pragma once
 
+/**
+ * @file libdy/types.h
+ * @brief Type definitions for common libdy types
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

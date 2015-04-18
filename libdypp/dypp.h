@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <libdy/dy_defs.h>
+#include <libdy/types.h>
 
 #include <exception>
 
