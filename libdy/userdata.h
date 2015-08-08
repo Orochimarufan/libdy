@@ -27,76 +27,49 @@
 extern "C" {
 #endif
 
-// ----------------------------------------------------------------------------
-// Calling
-// Calls should always return new references or NULL on error.
-/**
- * @brief Check if an object is callable
- * @param obj The object
+// TODO: Fix documentation
+
+// Checking for Userdata
+LIBDY_API bool DyUserdata_Check(DyObject *obj);
+
+/* Simple, non-callable Userdata
+ *
+ * Simple Userdata is used to proxy raw pointers through a libdy structure.
+ *
+ * The Userdata name can be used by the user to identify the type of pointer it
+ * contains.
  */
-LIBDY_API bool DyCallable_Check(DyObject *obj);
+LIBDY_API DyObject *DyUser_Create(void *data);
+LIBDY_API DyObject *DyUser_CreateNamed(void *data, const char *name);
 
-/**
- * @brief Call a callable object with a list of arguments
- * @param self The callable object
- * @param arglist The argument list
- * @return The call result
+LIBDY_API const char *DyUser_GetName(DyObject *self);
+LIBDY_API void *DyUser_GetData(DyObject *self);
+
+typedef void (*DyUser_Destructor)(void *data);
+LIBDY_API bool DyUser_SetDestructor(DyObject *ud, DyUser_Destructor fn);
+
+/* Callables
+ * 
+ * Callables are created using the DyUser_CreateCallable[01](callback, data)
+ * functions. All callbacks receive the object the callable was retrieved from
+ * (provided it wasn't called stand-alone in which case this will be NULL)
+ * as the first argument, as well as the data pointer associated with the Userdata
+ * as the second argument.
+ * 
+ * The 1-argument variant receives the provided argument as its third argument
+ * while the variable-arguments variant receives a list of provided arguments
+ * as its third argument.
+ * 
  */
-LIBDY_API DyObject *Dy_Call(DyObject *self, DyObject *arglist);
+typedef DyObject *(*DyUser_Callback)(DyObject *self, void *data, DyObject *arglist);
+typedef DyObject *(*DyUser_Callback0)(DyObject *self, void *data);
+typedef DyObject *(*DyUser_Callback1)(DyObject *self, void *data, DyObject *arg);
 
-/**
- * @brief Call a callable object without arguments
- * @param self The callable object
- * @return The call result
- */
-LIBDY_API DyObject *Dy_Call0(DyObject *self);
+LIBDY_API DyObject *DyUser_CreateCallable(DyUser_Callback fn, void *data);
+LIBDY_API DyObject *DyUser_CreateCallable0(DyUser_Callback0 fn, void *data);
+LIBDY_API DyObject *DyUser_CreateCallable1(DyUser_Callback1 fn, void *data);
 
-/**
- * @brief Call a callable object with a single argument
- * @param self The callable object
- * @param arg The argument
- * @return The call result
- */
-LIBDY_API DyObject *Dy_Call1(DyObject *self, DyObject *arg);
-
-/**
- * @brief Call a callable object with two arguments
- * @param self The callable object
- * @param arg1 The first argument
- * @param arg2 The second argument
- * @return The call result
- */
-LIBDY_API DyObject *Dy_Call2(DyObject *self, DyObject *arg1, DyObject *arg2);
-
-/**
- * @brief Call a callable object with three arguments
- * @param self The callable object
- * @param arg1 The first argument
- * @param arg2 The second argument
- * @param arg3 The third argument
- * @return The call result
- */
-LIBDY_API DyObject *Dy_Call3(DyObject *self, DyObject *arg1, DyObject *arg2, DyObject *arg3);
-
-// Creating callables
-typedef DyObject *(*DyNoArgFn)();
-typedef DyObject *(*DyNoArgFnWithData)(void *data);
-
-typedef DyObject *(*DySimpleFn)(DyObject *arg);
-typedef DyObject *(*DyArgListFnWithData)(DyObject *arglist, void *data);
-
-typedef DyObject *(*DyArgListFn)(DyObject *arglist);
-typedef DyObject *(*DySimpleFnWithData)(DyObject *arg, void *data);
-
-LIBDY_API DyObject *DyCall_CreateNoArg(DyNoArgFn fn);
-LIBDY_API DyObject *DyCall_CreateNoArgWithData(DyNoArgFnWithData fn, void *data);
-
-LIBDY_API DyObject *DyCall_CreateSimple(DySimpleFn fn);
-LIBDY_API DyObject *DyCall_CreateSimpleWithData(DySimpleFnWithData fn, void *data);
-
-LIBDY_API DyObject *DyCall_Create(DyArgListFn fn);
-LIBDY_API DyObject *DyCall_CreateWithData(DyArgListFnWithData fn, void *data);
-
+LIBDY_API DyObject *DyUser_CreateCallback(void(*fn)());
 
 #ifdef __cplusplus
 }

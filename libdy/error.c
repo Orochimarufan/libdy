@@ -29,6 +29,7 @@ typedef struct _DyExceptionObject {
     const char *errid;
     DyObject *cause;
     void *data;
+    void(*destruct_fn)(void*);
     char message[1];
 } DyExceptionObject;
 
@@ -52,6 +53,7 @@ static inline DyObject *DyErr_NewExceptionX(const char *errid, size_t message_si
     self->errid = errid;
     self->cause = NULL;
     self->data = arg;
+    self->destruct_fn = NULL;
     return (DyObject *)self;
 }
 
@@ -107,8 +109,19 @@ DyObject *DyErr_DiscardAndSetObject(DyObject *exception)
     return exception;
 }
 
+bool DyErr_SetExceptionData(DyObject *exception, void *data, void (*fn)(void*))
+{
+    if (DyErr_CheckArg("DyErr_SetExceptionData", 0, DY_EXCEPTION, exception))
+        return false;
+    ((DyExceptionObject*)exception)->data = data;
+    ((DyExceptionObject*)exception)->destruct_fn = fn;
+    return true;
+}
+
 void exception_destroy(DyObject *exc)
 {
+    if (((DyExceptionObject*)exc)->destruct_fn)
+        ((DyExceptionObject*)exc)->destruct_fn(((DyExceptionObject*)exc)->data);
     if (((DyExceptionObject*)exc)->cause)
         Dy_Release(((DyExceptionObject*)exc)->cause);
 }

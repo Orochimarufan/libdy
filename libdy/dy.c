@@ -20,7 +20,7 @@
 #include "string_p.h"
 #include "dict_p.h"
 #include "list_p.h"
-#include "callable_p.h"
+#include "userdata_p.h"
 #include "exceptions.h"
 #include "dystring.h"
 #include "buildstring.h"
@@ -177,6 +177,8 @@ void Dy_FreeObject(DyObject *o)
     	list_destroy((DyListObject *) o);
     else if (o->type == DY_EXCEPTION)
         exception_destroy(o);
+    else if (o->type == DY_USERDATA)
+        userdata_destroy(o);
 
     dy_free(o);
 }
@@ -295,8 +297,11 @@ dy_buildstring_t *bsrepr(dy_buildstring_t *bs, DyObject *self)
         return dict_bsrepr(bs, (DyDictObject *)self);
     case DY_LIST:
     	return list_bsrepr(bs, (DyListObject *)self);
-    case DY_CALLABLE:
-    	return bs_printf(bs, "<Callable at 0x%p (%x)>", ((DyCallableObject*)self)->function, ((DyCallableObject*)self)->flags);
+    case DY_USERDATA:
+    	return bs_printf(bs, "<Userdata at 0x%p (%x)>",
+            ((DyUserdataObject*)self)->call_fn || ((DyUserdataObject*)self)->data,
+            ((DyUserdataObject*)self)->flags
+        );
     case DY_EXCEPTION:
         return bs_printf(bs, "<Exception %s: %s>", DyErr_ErrId(self), DyErr_Message(self));
     default:

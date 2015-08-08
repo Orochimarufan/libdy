@@ -22,18 +22,20 @@
 #include "dy_p.h"
 
 
-#define DCD_NODATA 0
-#define DCD_HASDATA 1
-
-#define DCT_NOARG 0
-#define DCT_SIMPLE 1
-#define DCT_ARGLIST 10
+#define CBA_0       0x00
+#define CBA_1       0x01
+#define CBA_LIST    0x0F
 
 
-typedef struct _DyCallableObject {
+// Userdata can be callable
+typedef struct _DyUserdataObject {
     DyObject_HEAD
-    uint8_t flags; // "type" is already in use in the base DyObject!
-    DyObject *(*function)();
+    uint8_t flags;          // "type" is already in use in the base DyObject!
     void *data;
-} DyCallableObject;
+    const char *name;
+    // Functions
+    DyObject *(*call_fn)();
+    DyUser_Destructor destructor_fn;
+} DyUserdataObject;
 
+void userdata_destroy(DyObject *o);

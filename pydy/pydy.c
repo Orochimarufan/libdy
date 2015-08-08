@@ -19,6 +19,7 @@
 #include <Python.h>
 #include <libdy/dy.h>
 #include <libdy/exceptions.h>
+#include <libdy/userdata.h>
 #include "pydy.h"
 
 static PyObject *DyError;
@@ -29,7 +30,9 @@ static void raise_dy_error();
 static DyObject *py2dy(PyObject *o);
 static PyObject *dy2py(DyObject *obj);
 static PyObject *py2pydy(PyObject *o);
+static PyObject *dy2pyreturn(DyObject *o);
 
+static DyObject *pytuple2dylist(PyObject *o);
 static PyObject *dystr2pyunicode(DyObject *obj);
 static PyObject *dylong2pylong(DyObject *obj);
 static PyObject *dyfloat2pyfloat(DyObject *obj);
@@ -240,6 +243,34 @@ static PyObject *dy_repr(PyDy *self)
     return pys;
 }
 
+static PyObject *dy_call(PyDy *self, PyObject *args, PyObject *kwds)
+{
+    if (!DyCallable_Check(self->obj))
+    {
+        PyErr_SetString(PyExc_TypeError, "PyDy object not callable!");
+        return NULL;
+    }
+    if (kwds)
+    {
+        PyErr_SetString(PyExc_TypeError, "PyDy callables do not support keyword arguments!");
+        return NULL;
+    }
+
+    DyObject *dyargs = pytuple2dylist(args);
+    if (!dyargs)
+        return NULL;
+
+    DyObject *result = DyCallable_Call(self->obj, NULL, dyargs); // TODO: self
+    Dy_Release(dyargs);
+    if (!result)
+    {
+        raise_dy_error();
+        return NULL;
+    }
+
+    return dy2pyreturn(result);
+}
+
 static void dy_finalize(PyDy *self)
 {
     if (self->obj)
@@ -261,7 +292,7 @@ static PyTypeObject PyDyType = {
     &PyDy_SequenceMethods,     /* tp_as_sequence */
     &PyDy_MappingMethods,      /* tp_as_mapping */
     0,                         /* tp_hash  */
-    0,                         /* tp_call */
+    dy_call,                   /* tp_call */
     dy_str,                    /* tp_str */
     0,                         /* tp_getattro */
     0,                         /* tp_setattro */
@@ -343,12 +374,38 @@ static PyObject *PyDy_Pass(DyObject *dyobj)
     return obj;
 }
 
+typedef struct {
+    PyObject *tp;
+    PyObject *exc;
+    PyObject *tb;
+} PyDy_errstruct;
+
+static void PyDy_errstruct_free(void *data)
+{
+    PyDy_errstruct *es = (PyDy_errstruct*)data;
+    Py_XDECREF(es->tp);
+    Py_XDECREF(es->exc);
+    Py_XDECREF(es->tb);
+    free(es);
+}
+
 static void raise_dy_error()
 {
     DyObject *dy_exc = DyErr_Occurred();
     if (!dy_exc)
     {
         PyErr_SetString(PyExc_RuntimeError, "pydy: raise_dy_error called without active exception!");
+        return;
+    }
+
+    if (DyErr_Filter(dy_exc, "py.Exception.esx"))
+    {
+        PyDy_errstruct *es = (PyDy_errstruct*)DyErr_Data(dy_exc);
+        Py_XINCREF(es->tp);
+        Py_XINCREF(es->exc);
+        Py_XINCREF(es->tb);
+        PyErr_Restore(es->tp, es->exc, es->tb);
+        DyErr_Clear();
         return;
     }
 
@@ -368,10 +425,19 @@ static void raise_dy_error()
 
 static void raise_python_error_in_dy()
 {
-    PyObject *exc = PyErr_Occurred();
-    Py_INCREF(exc);
+    PyObject *tp;
+    PyObject *exc;
+    PyObject *tb;
 
-    if (PyObject_IsInstance(exc, DyError))
+    PyErr_Fetch(&tp, &exc, &tb);
+    if (!tp)
+    {
+        DyErr_Set("py.NoErrorSet", "raise_python_error_in_dy() called without python exception");
+        //_BREAK_
+    }
+    PyErr_NormalizeException(&tp, &exc, &tb);
+
+    if (tp == DyError)
     {
         PyObject *args = PyObject_GetAttrString(exc, "args");
         if (args)
@@ -391,16 +457,23 @@ static void raise_python_error_in_dy()
         }
     }
 
+    PyDy_errstruct *es = malloc(sizeof(PyDy_errstruct));
+    es->tp = tp;
+    es->exc = exc;
+    es->tb = tb;
+
+    DyObject *ex;
+
     PyObject *str = PyObject_Str(exc);
     if (str)
     {
-        DyErr_Format("py.Exception", "Python exception: %s", PyUnicode_AsUTF8(str));
+        ex = DyErr_Format("py.Exception.esx", "A python exception occured: %s", PyUnicode_AsUTF8(str));
         Py_DECREF(str);
     }
     else
-        DyErr_Set("py.Exception", "Python exception.");
-    Py_DECREF(exc);
-    PyErr_Clear();
+        ex = DyErr_Set("py.Exception.esx", "A python exception occured.");
+
+    DyErr_SetExceptionData(ex, es, &PyDy_errstruct_free);
 }
 
 // Conversion
@@ -549,6 +622,41 @@ static DyObject *pylist2dylist(PyObject *lst)
     return obj;
 }
 
+static DyObject *pytuple2dylist(PyObject *lst)
+{
+    Py_ssize_t size = PyTuple_Size(lst);
+    DyObject *obj = DyList_NewEx(size);
+
+    for (Py_ssize_t i = 0; i < size; ++i)
+    {
+        PyObject *itm = PyTuple_GetItem(lst, i);
+        if (!itm)
+        {
+            Dy_Release(obj);
+            return NULL;
+        }
+
+        DyObject *ditm = py2dy(itm);
+        if (!ditm)
+        {
+            Dy_Release(obj);
+            return NULL;
+        }
+
+        if (!DyList_Append(obj, ditm))
+        {
+            raise_dy_error();
+            Dy_Release(ditm);
+            Dy_Release(obj);
+            return NULL;
+        }
+
+        Dy_Release(ditm);
+    }
+
+    return obj;
+}
+
 static DyObject *pyfloat2dyfloat(PyObject *flt)
 {
     double value = PyFloat_AsDouble(flt);
@@ -566,29 +674,35 @@ static DyObject *pyfloat2dyfloat(PyObject *flt)
 
 static DyObject *py2dy(PyObject *o)
 {
+    DyObject *res;
     if (o == Py_None)
-        return Dy_Retain(Dy_None);
+        res = Dy_Retain(Dy_None);
     else if (o == Py_True)
-        return Dy_Retain(Dy_True);
+        res = Dy_Retain(Dy_True);
     else if (o == Py_False)
-        return Dy_Retain(Dy_False);
+        res = Dy_Retain(Dy_False);
     else if (PyDict_Check(o))
-        return pydict2dydict(o);
+        res = pydict2dydict(o);
     else if (PyDy_Check(o))
-        return Dy_Retain(PyDy_Get(o));
+        res = Dy_Retain(PyDy_Get(o));
     else if (PyLong_Check(o))
-        return pylong2dylong(o);
+        res = pylong2dylong(o);
     else if (PyFloat_Check(o))
-        return pyfloat2dyfloat(o);
+        res = pyfloat2dyfloat(o);
     else if (PyUnicode_Check(o))
-        return pyunicode2dystring(o);
+        res = pyunicode2dystring(o);
     else if (PyList_Check(o))
-        return pylist2dylist(o);
+        res = pylist2dylist(o);
+    else if (PyTuple_Check(o))
+        res = pytuple2dylist(o);
     else
     {
         PyErr_SetString(PyExc_TypeError, "Unknown conversion.");
         return NULL;
     }
+
+    Py_DECREF(o);
+    return res;
 }
 
 static PyObject *dystr2pyunicode(DyObject *str)
@@ -605,6 +719,105 @@ static PyObject *dylong2pylong(DyObject *lng)
 static PyObject *dyfloat2pyfloat(DyObject *flt)
 {
     return PyFloat_FromDouble(DyFloat_Get(flt));
+}
+
+static PyObject *dylist2pytuple_flat(DyObject *lst)
+{
+    // Raise python exc
+    size_t s = Dy_Length(lst);
+    PyObject *tup = PyTuple_New(s);
+
+    if (!tup)
+        return NULL;
+
+    for (size_t i = 0; i < s; ++i)
+        PyTuple_SET_ITEM(tup, i, PyDy_Pass(Dy_GetItemLong(lst, i)));
+
+    return tup;
+}
+
+static PyObject *dy2pyreturn(DyObject *o)
+{
+    PyObject *res;
+    if (o == Dy_None)
+        res = Py_None;
+    else if (o == Dy_True)
+        res = Py_True;
+    else if (o == Dy_False)
+        res = Py_False;
+    else
+    {
+        return PyDy_Pass(o);
+    }
+
+    Py_INCREF(res);
+    Dy_Release(o);
+    return res;
+}
+
+// functions
+static DyObject *pyfunc_wrapper(DyObject *self, void *data, DyObject *arglist)
+{
+    PyObject *fn = (PyObject *)data;
+
+    // __get__ the function object
+    PyObject *meth;
+    if (self)
+    {
+        PyObject *pyself = PyDy_New(self);
+        meth = PyObject_CallMethod(fn, "__get__", "O", pyself);
+        Py_DECREF(pyself);
+        if (!meth)
+        {
+            raise_python_error_in_dy();
+            return NULL;
+        }
+    }
+    else
+    {
+        meth = fn;
+        Py_INCREF(fn);
+    }
+
+    // Prepare arguments
+    PyObject *args = dylist2pytuple_flat(arglist);
+    if (!args)
+    {
+        raise_python_error_in_dy();
+        Py_DECREF(meth);
+        return NULL;
+    }
+
+    // Call function
+    PyObject *result = PyObject_CallObject(meth, args);
+
+    // Clean up
+    Py_DECREF(args);
+    Py_DECREF(meth);
+
+    if (!result)
+    {
+        raise_python_error_in_dy();
+        return NULL;
+    }
+
+    DyObject *res = py2dy(result);
+    Py_DECREF(result);
+    return res;
+}
+
+static void pyfunc_destructor(void *data)
+{
+    Py_DECREF((PyObject*)data);
+}
+
+static DyObject *pyfunc2udata(PyObject *fn)
+{
+    DyObject *udata = DyUser_CreateCallable(&pyfunc_wrapper, fn);
+    if (!udata)
+        return NULL;
+    DyUser_SetDestructor(udata, &pyfunc_destructor);
+    return udata;
 }
 
 // Public
@@ -633,7 +846,9 @@ PyObject *PyDy_WrapObject(DyObject *obj)
 
 PyObject *PyDy_StealObject(DyObject *obj)
 {
-    PyObject *o = PyDy_FromPython(obj);
+    PyObject *o = PyDy_New(obj);
+    if (!o)
+        raise_python_error_in_dy();
     Dy_Release(obj);
     return o;
 }
@@ -654,8 +869,52 @@ static PyObject *pydy_new(PyObject *self, PyObject *o)
         return w;
 }
 
+static PyObject *pydy_dict(PyObject *self, PyObject *args)
+{
+    PyObject *parent = NULL;
+    if (!PyArg_ParseTuple(args, "|O!:pydy.dict", &PyDyType, &parent))
+        return NULL;
+
+    DyObject *o;
+    if (parent)
+        o = DyDict_NewWithParent(PyDy_Get(parent));
+    else
+        o = DyDict_New();
+
+    return PyDy_Pass(o);
+}
+
+static PyObject *pydy_list(PyObject *self, PyObject *args)
+{
+    int size_hint = 0;
+    if (!PyArg_ParseTuple(args, "|k:pydy.list", &size_hint))
+        return NULL;
+
+    DyObject *o;
+    if (size_hint)
+        o = DyList_NewEx(size_hint);
+    else
+        o = DyList_New();
+
+    return PyDy_Pass(o);
+}
+
+static PyObject *pydy_func(PyObject *self, PyObject *fn)
+{
+    if (!PyCallable_Check(fn))
+    {
+        PyErr_SetString(PyExc_TypeError, "First argument to pydy.func needs to be a python callable!");
+        return NULL;
+    }
+
+    return PyDy_Pass(pyfunc2udata(fn));
+}
+
 static PyMethodDef DyMethods[] = {
     {"new", pydy_new, METH_O, "Create PyDy object from Pyton object."},
+    {"dict", pydy_dict, METH_VARARGS, "Create a PyDy dictionary, optionally with parent"},
+    {"list", pydy_list, METH_VARARGS, "Create a PyDy list, optionally pre-allocating space"},
+    {"func", pydy_func, METH_O, "Create a PyDy callable from a python function"},
     {NULL, NULL, 0, NULL}
 };
 

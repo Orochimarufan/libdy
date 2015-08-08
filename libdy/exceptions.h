@@ -80,6 +80,7 @@ LIBDY_API DyObject *  DyErr_Set(const char *errid, const char *message);
  * @param data Custom data to pass along with the exception
  * @return A pointer to the exception object
  * @sa DyErr_Set
+ * @deprecated Use DyErr_SetExceptionData instead.
  */
 LIBDY_API DyObject *    DyErr_SetEx(const char *errid, const char *message, void *data);
 
@@ -109,6 +110,16 @@ LIBDY_API DyObject *  DyErr_SetObject(DyObject *exception);
  * @note Compared to DyErr_SetObject, the cause will be left untouched.
  */
 LIBDY_API DyObject *  DyErr_DiscardAndSetObject(DyObject *exception);
+
+/**
+ * @brief Add data to an Exception object
+ * @param exception The exception object
+ * @param data The data
+ * @param destructor The destructor function (may be NULL)
+ * @return false with exception set on error
+ * @warning Only use once, otherwise the first destructor never gets called.
+ */
+LIBDY_API bool DyErr_SetExceptionData(DyObject *exception, void *data, void(*destructor)(void*));
 
 // Argument checking helpers
 /**

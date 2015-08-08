@@ -36,10 +36,9 @@ void Dy_Print(DyObject *o)
     Dy_Release(s);
 }
 
-DyObject *hello()
+void hello()
 {
     puts("hello world!");
-    return Dy_Retain(Dy_None);
 }
 
 int main(void)
@@ -47,9 +46,9 @@ int main(void)
     DyObject *str = DyString_FromString("Hello, World");
     DyObject *obj = DyDict_New();
     DyObject *obj2 = DyDict_NewWithParent(obj);
-    DyObject *fn = DyCall_CreateNoArg(&hello);
+    DyObject *fn = DyUser_CreateCallback(&hello);
     
-    Dy_Release(Dy_Call0(fn));
+    Dy_Release(DyCallable_Call0(fn, NULL));
     Dy_SetItemString(obj, "fn", fn);
 
     Dy_Print(str);

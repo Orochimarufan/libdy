@@ -139,6 +139,13 @@ public:
 
     template <typename T>
     SubscriptionRef &operator =(T value);
+
+    // Calling
+    template <typename Arg>
+    inline Object operator()(Arg);
+
+    template <typename... Args>
+    inline Object operator()(Args...);
 };
 
 class Exception : std::exception

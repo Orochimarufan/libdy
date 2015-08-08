@@ -8,7 +8,7 @@ headers = (
     "dict_p.h",
     "string_p.h",
     "freelist_p.h",
-    "callable_p.h",
+    "userdata_p.h",
 )
 
 public_headers = (
@@ -19,7 +19,7 @@ public_headers = (
     "buildstring.h",
     "json_token.h",
     "linalloc.h",
-    
+
     # Objects
     "types.h",
     "object.h",
@@ -27,12 +27,14 @@ public_headers = (
     "numbers.h",
     "dystring.h",
     "collections.h",
-    "json.h"
-    
+    "json.h",
+    "call.h",
+    "userdata.h",
+
     # Exceptions
     "exceptions.h",
     "exceptions_c.h",
-    
+
     "dy.h",
 )
 
@@ -46,7 +48,7 @@ sources = (
     "list.c",
     "freelist.c",
     "string_intern.c",
-    "callable.c",
+    "userdata.c",
     "linalloc.c",
     "buildstring.c",
     "json_token.c",
@@ -57,7 +59,7 @@ sources = (
 def options(opt):
     opt.load("compiler_c")
     opt.load("doxygen")
-    
+
     opt.add_option("-D", "--no-docs", action="store_true",
         help="Don't build the Doxygen documentation")
 
@@ -65,7 +67,7 @@ def options(opt):
 def configure(cnf):
     cnf.load("compiler_c")
     cnf.load("doxygen")
-    
+
     if cnf.options.no_docs:
         cnf.env.NO_DOXYGEN="1"
 
@@ -74,15 +76,15 @@ def configure(cnf):
 
 def build(bld):
     bld.shlib(
-    	source=sources,
-    	target="dy",
+        source=sources,
+        target="dy",
 
-    	includes=["."],
-    	defines=["BUILDING_LIBDY_CORE"],
-    	cflags=["-std=c11", "-fvisibility=hidden"],
+        includes=["."],
+        defines=["BUILDING_LIBDY_CORE"],
+        cflags=["-std=c11", "-fvisibility=hidden"],
         linkflags=["-lm"], #// TODO: maybe inline?
     )
-    
+
     if bld.env.DOXYGEN and not bld.env.NO_DOXYGEN:
         bld(features="doxygen",
             doxyfile="Doxyfile",

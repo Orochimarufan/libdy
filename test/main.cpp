@@ -28,16 +28,26 @@ void Dy_Print(const Dy::Object &o)
     puts(o.str());
 }
 
-DyObject *hello()
+void hello()
 {
     puts("hello world!");
-    return Dy_Retain(Dy_None);
 }
 
-DyObject *callLambda(void *lambda)
+DyObject *callLambda(DyObject *x, void *lambda)
 {
     ((std::function<void()>*)lambda)->operator()();
     return Dy_Retain(Dy_None);
+}
+
+DyObject *testSelf(DyObject *self, void *x)
+{
+    Dy_Print(self);
+    return Dy_Retain(Dy_None);
+}
+
+void testDestroy(void *x)
+{
+    Dy_Print("Destruction!");
 }
 
 int _main(void)
@@ -45,10 +55,10 @@ int _main(void)
     Dy::Object str("Hello, World");
     Dy::Object obj(DyDict_New(), true);
     Dy::Object obj2(DyDict_NewWithParent(obj.get()), true);
-    Dy::Object fn(DyCall_CreateNoArg(&hello), true);
+    Dy::Object fn(DyUser_CreateCallback(&hello), true);
 
     std::function<void()> lfn = [] () { puts("hello lambda!"); };
-    Dy::Object la(DyCall_CreateNoArgWithData(&callLambda, &lfn), true);
+    Dy::Object la(DyUser_CreateCallable0(&callLambda, &lfn), true);
 
     fn();
     la();
@@ -64,6 +74,14 @@ int _main(void)
 
     obj["Derp"].del();
     Dy_Print(obj);
+
+    Dy::Object testSelfFn(DyUser_CreateCallable0(&testSelf, nullptr), true);
+    DyUser_SetDestructor(testSelfFn.get(), &testDestroy);
+
+    Dy_Print("------");
+    obj["test"] = testSelfFn;
+    obj["test"]();
+    obj2["test"]();
 
     return 0;
 }

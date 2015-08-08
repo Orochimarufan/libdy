@@ -43,7 +43,7 @@ typedef enum _DyObject_Type
     DY_STRING,
     DY_DICT,
     DY_LIST,
-    DY_CALLABLE,
+    DY_USERDATA,
     DY_EXCEPTION,
 } DyObject_Type;
 

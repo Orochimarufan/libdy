@@ -18,10 +18,11 @@
 
 #pragma once
 
-#include <libdy/dy.h> // TODO: try to keep the C symbols separate. AKA make the C++ interface more complete
+#include <libdy/dy.h> // TODO: keep the C symbols separate?
 #include "dypp_conv.h" // TODO: maybe make this opt-in?
 
 // Included from dypp.h
+
 
 namespace Dy {
 
@@ -54,19 +55,19 @@ inline Object makeList(Args... args)
 template <>
 inline Object Object::operator()()
 {
-    return Dy_Call0(get());
+    return DyCallable_Call0(get(), NULL);
 }
 
 template <typename Arg>
 inline Object Object::operator()(Arg arg)
 {
-    return Dy_Call1(get(), Dy_Pass(conv::from_value_or_ref(arg)));
+    return DyCallable_Call1(get(), NULL, Dy_Pass(conv::from_value_or_ref(arg)));
 }
 
 template <typename... Args>
 inline Object Object::operator()(Args... args)
 {
-    return Dy_Call(get(), makeList(args...).get());
+    return Dy_Call(get(), NULL, makeList(args...).get());
 }
 
 template <typename T>
@@ -100,6 +101,24 @@ SubscriptionRef &SubscriptionRef::operator =(T value)
     assign(conv::from_value(value), true);
     Dy_SetItem(container, key, d);
     return *this;
+}
+
+template <>
+inline Object SubscriptionRef::operator()()
+{
+    return DyCallable_Call0(get(), container);
+}
+
+template <typename Arg>
+inline Object SubscriptionRef::operator()(Arg arg)
+{
+    return DyCallable_Call1(get(), container, Dy_Pass(conv::from_value_or_ref(arg)));
+}
+
+template <typename... Args>
+inline Object SubscriptionRef::operator()(Args... args)
+{
+    return Dy_Call(get(), container, makeList(args...).get());
 }
 
 }

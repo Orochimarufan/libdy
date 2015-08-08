@@ -35,12 +35,12 @@
     <File Name="freelist.c"/>
     <File Name="freelist_p.h"/>
     <File Name="string_intern.c"/>
-    <File Name="callable_p.h"/>
-    <File Name="callable.c"/>
     <File Name="json_token.c"/>
     <File Name="buildstring.c"/>
     <File Name="json.c"/>
     <File Name="linalloc.c"/>
+    <File Name="userdata_p.h"/>
+    <File Name="userdata.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include/libdy">
     <File Name="dy.h"/>
@@ -59,6 +59,7 @@
     <File Name="dystring.h"/>
     <File Name="config.h"/>
     <File Name="collections.h"/>
+    <File Name="call.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
