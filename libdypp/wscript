@@ -2,7 +2,7 @@
 # :vim set ft=python
 
 headers = ()
-public_headers = "dypp.h",
+public_headers = "dypp.h", "dypp_impl.h", "dypp_conv.h", "callable.h"
 sources = "dypp.cpp",
 
 def options(opt):
@@ -22,6 +22,6 @@ def build(bld):
 
     	includes=[".", ".."],
     	defines=["__LIBDYPP_LIBRARY"],
-    	cxxflags=["-std=c++11"],
+    	cxxflags=["-std=c++14"],
     	use="dy"
     )

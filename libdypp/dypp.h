@@ -114,11 +114,13 @@ public:
     operator T () const;
 
     inline DyObject *get() const;
-    
+
     // Calling
+    inline Object operator()();
+
     template <typename Arg>
     inline Object operator()(Arg);
-    
+
     template <typename... Args>
     inline Object operator()(Args...);
 };
@@ -154,6 +156,8 @@ public:
     SubscriptionRef &operator =(T value);
 
     // Calling
+    inline Object operator()();
+
     template <typename Arg>
     inline Object operator()(Arg);
 
@@ -205,4 +209,4 @@ Object dict(std::initializer_list<std::pair<Object, Object>> il, Object parent=U
 
 }
 
-#include "dypp.impl.h"
+#include "dypp_impl.h"

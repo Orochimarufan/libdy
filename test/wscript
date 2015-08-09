@@ -33,7 +33,7 @@ def build(bld):
         target="testdypp",
         
         includes=[".."],
-        cxxflags=["-std=c++11"],
+        cxxflags=["-std=c++14"],
         use="dypp",
     )
 

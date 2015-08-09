@@ -21,6 +21,7 @@
 #include <functional>
 
 #include <libdypp/dypp.h>
+#include <libdypp/callable.h>
 #include <libdy/userdata.h>
 
 void Dy_Print(const Dy::Object &o)
@@ -33,66 +34,47 @@ void hello()
     puts("hello world!");
 }
 
-DyObject *callLambda(DyObject *x, void *lambda)
-{
-    ((std::function<void()>*)lambda)->operator()();
-    return Dy_Retain(Dy_None);
-}
-
-DyObject *testSelf(DyObject *self, void *x)
+void test_method(const Dy::Object &self)
 {
     Dy_Print(self);
-    return Dy_Retain(Dy_None);
 }
 
-void testDestroy(void *x)
+const char *rtest()
 {
-    Dy_Print("Destruction!");
+    return "hello world";
 }
 
 int _main(void)
 {
     Dy::Object str("Hello, World");
-    Dy::Object obj(DyDict_New(), true);
-    Dy::Object obj2(DyDict_NewWithParent(obj.get()), true);
-    Dy::Object fn(DyUser_CreateCallback(&hello), true);
 
-    std::function<void()> lfn = [] () { puts("hello lambda!"); };
-    Dy::Object la(DyUser_CreateCallable0(&callLambda, &lfn), true);
+    puts(str);
 
-    fn();
-    la();
-
-    Dy_Print(str);
-
-    obj["hello"] = str;
-    Dy_Print(obj["hello"]);
-    Dy_Print(obj2["hello"]);
-
-    obj["Derp"] = "HAHAHA";
-    Dy_Print(obj);
-
-    obj["Derp"].del();
-    Dy_Print(obj);
-
-    Dy::Object testSelfFn(DyUser_CreateCallable0(&testSelf, nullptr), true);
-    DyUser_SetDestructor(testSelfFn.get(), &testDestroy);
-
-    Dy_Print("------");
-    obj["test"] = testSelfFn;
-    obj["test"]();
-    obj2["test"]();
-
-    Dy_Print("-------------------------");
-
-    Dy::Object obj3 = Dy::dict({
-        {"Hello", "World"},
-        {"Good", "Morning"},
+    Dy::Object dict = Dy::dict({
+        {"hello", Dy::function(::hello)},
+        {"method", Dy::method(::test_method)},
+        {"return", Dy::function(::rtest)},
+        {"text", "Yo!"},
     });
-    Dy_Print(obj3);
 
-    Dy::Object lst {"a", "b", "c", 1, 2, 3};
-    Dy_Print(lst);
+    Dy::Object dict2 = Dy::dict({
+        {1, {2, 3, 4, 5, "and more"}},
+        {"print", Dy::function(::Dy_Print)},
+    }, dict);
+
+    Dy_Print(dict);
+    Dy_Print(dict2);
+
+    Dy_Print(dict2["text"]);
+    dict2["stuff"] = 4;
+    Dy_Print(dict2);
+
+    puts("--------------------------------");
+
+    dict2["hello"]();
+    dict["method"]();
+    dict2["method"]();
+    dict2["print"](dict["return"]());
 
     return 0;
 }
@@ -105,6 +87,12 @@ int main(void)
     catch (Dy::Exception &e)
     {
         std::cerr << e.errid() << ": " << e.what() << std::endl;
+        DyObject *cause = e.cause();
+        while(cause)
+        {
+            std::cerr << "Caused by: " << DyErr_ErrId(cause) << ": " << DyErr_Message(cause) << std::endl;
+            cause = DyErr_Cause(cause);
+        }
         e.clear();
         return 1;
     }

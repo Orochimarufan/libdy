@@ -153,7 +153,7 @@ const char *DyObject_Type_Names[] = {
 
 DyObject *DyErr_SetArgumentTypeError(const char *fname, int arg_num, const char *expected, const char *got)
 {
-    size_t length = strlen(fname) + 10 + strlen(expected) + strlen(got);
+    size_t length = strlen(fname) + 42 + strlen(expected) + strlen(got);
     DyObject *self = DyErr_NewExceptionX(DY_ERRID_ARGUMENT_TYPE, length, NULL, NULL);
     snprintf(((DyExceptionObject *)self)->message, length, "%s(): Argument %i: expected %s but got %s object.", fname, arg_num, expected, got);
     return DyErr_SetObject(Dy_Pass(self));

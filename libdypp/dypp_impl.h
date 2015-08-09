@@ -52,25 +52,28 @@ inline Object makeList(Args... args)
     return list;
 }
 
+// -----------------------------------------------------------------------------
 // Object
-template <>
+
+// Call operator
 inline Object Object::operator()()
 {
-    return DyCallable_Call0(get(), NULL);
+    return Object(DyCallable_Call0(get(), NULL), true);
 }
 
 template <typename Arg>
 inline Object Object::operator()(Arg arg)
 {
-    return DyCallable_Call1(get(), NULL, Dy_Pass(conv::from_value_or_ref(arg)));
+    return Object(DyCallable_Call1(get(), NULL, Object(arg).get()), true); // TODO: try to use from_value instead of Object().get()
 }
 
 template <typename... Args>
 inline Object Object::operator()(Args... args)
 {
-    return Dy_Call(get(), NULL, makeList(args...).get());
+    return Object(Dy_Call(get(), NULL, makeList(args...).get()), true);
 }
 
+// Constructor
 template <typename T>
 inline Object::Object(T value) :
     d(0)
@@ -89,6 +92,7 @@ inline DyObject *Object::get() const
     return d;
 }
 
+// -----------------------------------------------------------------------------
 // SubscriptionRef
 template <typename T>
 inline SubscriptionRef Object::operator[] (T key)
@@ -104,23 +108,22 @@ SubscriptionRef &SubscriptionRef::operator =(T value)
     return *this;
 }
 
-// Call with self
-template <>
+// Call operator (with self)
 inline Object SubscriptionRef::operator()()
 {
-    return DyCallable_Call0(get(), container);
+    return Object(DyCallable_Call0(get(), container), true);
 }
 
 template <typename Arg>
 inline Object SubscriptionRef::operator()(Arg arg)
 {
-    return DyCallable_Call1(get(), container, Dy_Pass(conv::from_value_or_ref(arg)));
+    return Object(DyCallable_Call1(get(), container, Object(arg).get()), true); // TODO: try to use from_value instead of Object().get()
 }
 
 template <typename... Args>
 inline Object SubscriptionRef::operator()(Args... args)
 {
-    return Dy_Call(get(), container, makeList(args...).get());
+    return Object(Dy_Call(get(), container, makeList(args...).get()), true);
 }
 
 }

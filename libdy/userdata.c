@@ -75,6 +75,7 @@ bool DyUser_SetDestructor(DyObject *ud, DyDataDestructor fn)
     if (DyErr_CheckArg("DyUser_SetDestructor", 0, DY_USERDATA, ud))
         return false;
     ((DyUserdataObject*)ud)->destructor_fn = fn;
+    return true;
 }
 
 // Create
@@ -213,7 +214,7 @@ DyObject *DyCallable_Call1(DyObject *callable, DyObject *self, DyObject *arg)
     if (DyErr_CheckArg("DyCallable_Call1", 0, DY_USERDATA, callable))
         return_null;
 
-    DyUserdataObject *co = (DyUserdataObject *)self;
+    DyUserdataObject *co = (DyUserdataObject *)callable;
     if (!co->call_fn)
     {
         DyErr_SetArgumentTypeError("DyCallable_Call1", 0, "Callable", "Simple Userdata");

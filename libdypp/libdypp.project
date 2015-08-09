@@ -95,7 +95,8 @@
   <VirtualDirectory Name="include/libdypp">
     <File Name="dypp.h"/>
     <File Name="dypp_conv.h"/>
-    <File Name="dypp.impl.h"/>
+    <File Name="callable.h"/>
+    <File Name="dypp_impl.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>

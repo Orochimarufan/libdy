@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include <libdy/dy.h>
 
 #include <string>
@@ -28,15 +30,25 @@ namespace conv {
 
 // ===================================================================
 // From Value
+inline DyObject *from_value(int number)
+{
+    return DyLong_New(number);
+}
+
 inline DyObject *from_value(long number)
 {
     return DyLong_New(number);
 }
 
-//inline DyObject *from_value(double floating)
-//{
-//    return DyFloat_New(floating);
-//}
+inline DyObject *from_value(float floating)
+{
+    return DyFloat_New(floating);
+}
+
+inline DyObject *from_value(double floating)
+{
+    return DyFloat_New(floating);
+}
 
 inline DyObject *from_value(const char *str)
 {

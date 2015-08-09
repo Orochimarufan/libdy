@@ -20,6 +20,11 @@
 
 #include <libdy/exceptions.h>
 
+#include <csignal>
+
+#define __TRAP__ //std::raise(SIGTRAP);
+//#define __TRAP__
+
 namespace Dy {
 
 inline void Object::check(::DyObject *o)
@@ -250,6 +255,7 @@ void throw_exception()
     ::DyObject *e = DyErr_Occurred();
     if (!e)
         e = DyErr_Set("cxx.throw.NoExceptionSet", "throw_exception() called with no libdy exception set");
+    __TRAP__
     throw Exception(e);
 }
 
@@ -259,12 +265,14 @@ void throw_exception(DyObject *exception)
         exception = DyErr_Set("cxx.throw.NullException", "NULL passed to throw_exception(exc)");
     else if (DyErr_Occurred() != exception)
         DyErr_SetObject(exception);
+    __TRAP__
     throw Exception(exception);
 }
 
 void throw_exception(const char *errid, const char *message)
 {
     ::DyObject *e = DyErr_Set(errid, message);
+    __TRAP__
     throw Exception(e);
 }
 
@@ -274,6 +282,7 @@ void format_exception(const char *errid, const char *format, ...)
     va_start(va, format);
     ::DyObject *e = DyErr_FormatV(errid, format, va);
     va_end(va);
+    __TRAP__
     throw Exception(e);
 }
 
