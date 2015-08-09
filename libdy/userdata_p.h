@@ -35,7 +35,7 @@ typedef struct _DyUserdataObject {
     const char *name;
     // Functions
     DyObject *(*call_fn)();
-    DyUser_Destructor destructor_fn;
+    DyDataDestructor destructor_fn;
 } DyUserdataObject;
 
 void userdata_destroy(DyObject *o);

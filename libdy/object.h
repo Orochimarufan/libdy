@@ -43,13 +43,13 @@ extern "C" {
  *
  * Note that Undefined is DY_NONE, like None
  */
-LIBDY_API DyObject_Type Dy_Type(DyObject *object);
+LIBDY_API DyObjectType Dy_Type(DyObject *object);
 
 /**
  * @brief Retrieve the name of a type in the DyObject_Type enumeration
  * @param t The type value
  */
-LIBDY_API const char *  Dy_GetTypeName(DyObject_Type t);
+LIBDY_API const char *  Dy_GetTypeName(DyObjectType t);
 
 
 ///@}
@@ -97,7 +97,7 @@ LIBDY_API DyObject *Dy_Pass(DyObject *self);
  *
  * If the object cannot be hashed, an exception is set and 0 is returned
  */
-LIBDY_API Dy_hash_t Dy_Hash(DyObject *self);
+LIBDY_API DyHash Dy_Hash(DyObject *self);
 
 /**
  * @brief Compute the hash of an object
@@ -105,7 +105,7 @@ LIBDY_API Dy_hash_t Dy_Hash(DyObject *self);
  * @param out Variable to store the result in
  * @return Whether the object could be hashed
  */
-LIBDY_API bool      Dy_HashEx(DyObject *self, Dy_hash_t *out);
+LIBDY_API bool      Dy_HashEx(DyObject *self, DyHash *out);
 
 ///@}
 // ----------------------------------------------------------------------------

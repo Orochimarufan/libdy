@@ -99,9 +99,9 @@ static inline void MurmurHash3_x86_32 ( const void * key, int len,
   *(uint32_t*)out = h1;
 }
 
-Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length)
+DyHash Dy_hash_Murmur3_32(const char *data, size_t length)
 {
-    Dy_hash_t result;
+    DyHash result;
     MurmurHash3_x86_32(data, length, 0, &result);
     return result;
 }
@@ -116,7 +116,7 @@ static inline unsigned fnv1Hash(const char *key, unsigned len)
     return hash;
 }
 
-Dy_hash_t Dy_hash_fnv1(const char *data, size_t length)
+DyHash Dy_hash_fnv1(const char *data, size_t length)
 {
     return fnv1Hash(data, length);
 }

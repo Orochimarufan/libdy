@@ -70,7 +70,7 @@ void userdata_destroy(DyObject *o)
         co->destructor_fn(co->data);
 }
 
-bool DyUser_SetDestructor(DyObject *ud, DyUser_Destructor fn)
+bool DyUser_SetDestructor(DyObject *ud, DyDataDestructor fn)
 {
     if (DyErr_CheckArg("DyUser_SetDestructor", 0, DY_USERDATA, ud))
         return false;

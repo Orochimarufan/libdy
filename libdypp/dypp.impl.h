@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include <libdy/dy.h> // TODO: keep the C symbols separate?
+#include <libdy/object.h> // TODO: keep the C symbols separate?
+#include <libdy/collections.h>
 #include "dypp_conv.h" // TODO: maybe make this opt-in?
 
 // Included from dypp.h
@@ -103,6 +104,7 @@ SubscriptionRef &SubscriptionRef::operator =(T value)
     return *this;
 }
 
+// Call with self
 template <>
 inline Object SubscriptionRef::operator()()
 {

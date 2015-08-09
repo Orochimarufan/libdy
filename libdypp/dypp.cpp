@@ -22,14 +22,14 @@
 
 namespace Dy {
 
-void Object::check(::DyObject *o)
+inline void Object::check(::DyObject *o)
 {
     if (!o)
     {
     	::DyObject *e = ::DyErr_Occurred();
     	if (!e)
     		e = ::DyErr_Set("dy.cxx.NullPointer", "Tried to create null reference");
-    	throw Exception(e);
+    	throw_exception(e);
     }
 }
 
@@ -65,6 +65,31 @@ Object::Object(Object &&object) :
 }
 
 
+Object::Object(std::initializer_list<Object> il) :
+    d(0)
+{
+    assign(DyList_NewEx(il.size()), true);
+
+    for (decltype(il)::const_iterator i = il.begin(); i != il.end(); ++i)
+        if (!DyList_Append(d, i->get()))
+            throw_exception();
+}
+
+Object dict(std::initializer_list<std::pair<Object, Object>> il, Object parent)
+{
+    DyObject *o;
+    if (parent != Undefined)
+        o = DyDict_NewWithParent(parent.get());
+    else
+        o = DyDict_New();
+
+    for (decltype(il)::const_iterator i = il.begin(); i != il.end(); ++i)
+        if (!Dy_SetItem(o, i->first.get(), i->second.get()))
+            throw_exception();
+
+    return Dy_Pass(o);
+}
+
 // Destruction
 Object::~Object()
 {
@@ -72,7 +97,7 @@ Object::~Object()
 }
 
 // Type
-DyObject_Type Object::type() const
+DyObjectType Object::type() const
 {
     return Dy_Type(d);
 }
@@ -100,19 +125,19 @@ Object Object::repr() const
 }
 
 // Comparison
-bool Object::operator==(const Object &other)
+bool Object::operator==(const Object &other) const
 {
     return Dy_Equals(d, other.d);
 }
 
-bool Object::operator!=(const Object &other)
+bool Object::operator!=(const Object &other) const
 {
     return !Dy_Equals(d, other.d);
 }
 
-Dy_hash_t Object::hash()
+DyHash Object::hash()
 {
-    Dy_hash_t result;
+    DyHash result;
     if (!Dy_HashEx(d, &result))
     	throw_exception(DY_ERRID_NOT_HASHABLE, "Object is not hashable");
     return result;
@@ -146,7 +171,8 @@ SubscriptionRef::~SubscriptionRef()
 // Delete
 void SubscriptionRef::del()
 {
-    Dy_SetItem(container, key, nullptr);
+    if (!Dy_SetItem(container, key, nullptr))
+        throw_exception();
     assign(Dy_Undefined);
 }
 
@@ -154,14 +180,16 @@ void SubscriptionRef::del()
 SubscriptionRef &SubscriptionRef::operator =(DyObject *object)
 {
     assign(object);
-    Dy_SetItem(container, key, object);
+    if (!Dy_SetItem(container, key, object))
+        throw_exception();
     return *this;
 }
 
 SubscriptionRef &SubscriptionRef::operator =(const Object &object)
 {
     assign(object.get());
-    Dy_SetItem(container, key, object.get());
+    if (!Dy_SetItem(container, key, object.get()))
+        throw_exception();
     return *this;
 }
 
@@ -169,7 +197,8 @@ SubscriptionRef &SubscriptionRef::operator =(Object &&object)
 {
     assign(object.d, true);
     object.d = Dy_Retain(Dy_Undefined);
-    Dy_SetItem(container, key, d);
+    if (!Dy_SetItem(container, key, d))
+        throw_exception();
     return *this;
 }
 
@@ -216,10 +245,42 @@ void Exception::clear()
 }
 
 // Error
-void throw_exception(const char *errid, const char *message, void *data)
+void throw_exception()
 {
-    ::DyObject *e = DyErr_SetEx(errid, message, data);
+    ::DyObject *e = DyErr_Occurred();
+    if (!e)
+        e = DyErr_Set("cxx.throw.NoExceptionSet", "throw_exception() called with no libdy exception set");
     throw Exception(e);
 }
+
+void throw_exception(DyObject *exception)
+{
+    if (!exception)
+        exception = DyErr_Set("cxx.throw.NullException", "NULL passed to throw_exception(exc)");
+    else if (DyErr_Occurred() != exception)
+        DyErr_SetObject(exception);
+    throw Exception(exception);
+}
+
+void throw_exception(const char *errid, const char *message)
+{
+    ::DyObject *e = DyErr_Set(errid, message);
+    throw Exception(e);
+}
+
+void format_exception(const char *errid, const char *format, ...)
+{
+    va_list va;
+    va_start(va, format);
+    ::DyObject *e = DyErr_FormatV(errid, format, va);
+    va_end(va);
+    throw Exception(e);
+}
+
+// Constants
+const Object Undefined(Dy_Undefined);
+const Object None(Dy_None);
+const Object True(Dy_True);
+const Object False(Dy_False);
 
 }

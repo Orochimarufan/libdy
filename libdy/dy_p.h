@@ -44,9 +44,9 @@ struct _DyObject {
 };
 
 // Private Prototypes
-void Dy_InitObject(DyObject *, DyObject_Type);
+void Dy_InitObject(DyObject *, DyObjectType);
 void Dy_FreeObject(DyObject *);
-bool Dy_HashEx(DyObject *, Dy_hash_t *);
+bool Dy_HashEx(DyObject *, DyHash *);
 
 // cause it doesn't go anywhere else either
 void exception_destroy(DyObject *exc);

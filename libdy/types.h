@@ -33,7 +33,7 @@ typedef struct _DyObject DyObject;
 
 // ----------------------------------------------------------------------------
 /// DyObject Types
-typedef enum _DyObject_Type
+typedef enum _DyObjectType
 {
     DY_INVALID = -1,
     DY_NONE = 0,
@@ -45,11 +45,17 @@ typedef enum _DyObject_Type
     DY_LIST,
     DY_USERDATA,
     DY_EXCEPTION,
-} DyObject_Type;
+} DyObjectType;
 
 // ----------------------------------------------------------------------------
 /// Hash type
-typedef long Dy_hash_t;
+typedef long DyHash;
+
+// ----------------------------------------------------------------------------
+/// Destructor function type used in different places
+///
+/// Takes the data pointer as argument and doesn't return anything
+typedef void(*DyDataDestructor)(void*);
 
 #ifdef __cplusplus
 }

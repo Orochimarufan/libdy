@@ -432,9 +432,10 @@ static void raise_python_error_in_dy()
     PyErr_Fetch(&tp, &exc, &tb);
     if (!tp)
     {
-        DyErr_Set("py.NoErrorSet", "raise_python_error_in_dy() called without python exception");
-        //_BREAK_
+        DyErr_Set("py.NoExceptionSet", "raise_python_error_in_dy() called without python exception");
+        return;
     }
+
     PyErr_NormalizeException(&tp, &exc, &tb);
 
     if (tp == DyError)

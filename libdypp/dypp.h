@@ -21,12 +21,19 @@
 #include <libdy/types.h>
 
 #include <exception>
+#include <initializer_list>
+#include <utility>
 
 namespace Dy {
 
 class Object;
 class SubscriptionRef;
 class Exception;
+
+extern const Object Undefined;
+extern const Object None;
+extern const Object True;
+extern const Object False;
 
 /**
  * @brief Object Reference class.
@@ -68,8 +75,14 @@ public:
 
     ~Object();
 
+    // Initializer-construction
+    /**
+     * Construct a libdy list
+     */
+    Object(std::initializer_list<Object> il);
+
     // Type
-    DyObject_Type type() const;
+    DyObjectType type() const;
     const char *type_name() const;
 
     // Subscription
@@ -87,10 +100,10 @@ public:
     std::size_t length() const;
 
     // Comparison
-    bool operator==(const Object &);
-    bool operator!=(const Object &);
+    bool operator==(const Object &) const;
+    bool operator!=(const Object &) const;
 
-    Dy_hash_t hash();
+    DyHash hash();
 
     // Representation
     Object str() const;
@@ -113,11 +126,11 @@ public:
 /**
  * @brief Reference retrieved by subscribing to another object
  * This allows assignments like object["hello"] = "Derp";
- * NOTE These should be treated as temporary objects only.
- *     	Storing them (SubscriptionRef x = object["hello"]) does not make sense
- *     	Be careful about auto x = object["hello"] because it might defer SubscriptionRef
- *     	as the resulting type. Object x = object["hello"] is preferred.
- * WARNING The Destructor is non-virtual, so polymorphism mustn't be relied on.
+ * @note These should be treated as temporary objects only.
+ *     	 Storing them (SubscriptionRef x = object["hello"]) does not make sense
+ *     	 Be careful about auto x = object["hello"] because it might defer SubscriptionRef
+ *     	 as the resulting type. Object x = object["hello"] is preferred.
+ * @warning Don't down-cast it to Object, use Object's copy constructor instead!
  */
 class SubscriptionRef : public Object
 {
@@ -152,8 +165,14 @@ class Exception : std::exception
 {
     DyObject *d;
 
-public:
     Exception(DyObject *exception);
+
+    friend void throw_exception();
+    friend void throw_exception(DyObject *);
+    friend void throw_exception(const char *, const char *);
+    friend void format_exception(const char *, const char *, ...);
+
+public:
     ~Exception() noexcept;
 
     const char *what();
@@ -166,14 +185,23 @@ public:
     void clear();
 };
 
-// data is optional. see dycpp_conv.h
-void throw_exception(const char *errid, const char *message, void *data);
+void throw_exception();
+void throw_exception(DyObject *exception);
+void throw_exception(const char *errid, const char *message);
+void format_exception(const char *errid, const char *format, ...);
 
 template <typename... Args>
 inline Object makeList(Args... args);
 
 template <typename... Args>
 inline void appendToList(Object &list, Args... args);
+
+/**
+ * @brief Create a new dictionary
+ * @param parent Optional parent dictionary to inherit from
+ * @return
+ */
+Object dict(std::initializer_list<std::pair<Object, Object>> il, Object parent=Undefined);
 
 }
 

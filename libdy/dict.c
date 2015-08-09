@@ -32,8 +32,8 @@ bool DyDict_Check(DyObject *self)
 }
 
 // Prototypes
-static bucket_t *find_bucket(DyDictObject *, DyObject *key, Dy_hash_t hash);
-static bucket_t *find_or_create_bucket(DyDictObject *, DyObject *key, Dy_hash_t hash);
+static bucket_t *find_bucket(DyDictObject *, DyObject *key, DyHash hash);
+static bucket_t *find_or_create_bucket(DyDictObject *, DyObject *key, DyHash hash);
 
 // Implementation
 static inline void dict_init(DyDictObject *o)
@@ -124,7 +124,7 @@ void dict_destroy(DyDictObject *o)
         Dy_Release((DyObject*)o->parent);
 }
 
-static bucket_t *find_bucket(DyDictObject *o, DyObject *key, Dy_hash_t hash)
+static bucket_t *find_bucket(DyDictObject *o, DyObject *key, DyHash hash)
 {
     bucket_t *bucket = &o->table[hash % DY_TABLE_SIZE];
 
@@ -151,7 +151,7 @@ static bucket_block_t *create_block(size_t bucket_count)
     return block;
 }
 
-static bucket_t *find_or_create_bucket(DyDictObject *o, DyObject *key, Dy_hash_t hash)
+static bucket_t *find_or_create_bucket(DyDictObject *o, DyObject *key, DyHash hash)
 {
     bucket_t *first = &o->table[hash % DY_TABLE_SIZE];
     bucket_t *bucket = first;
@@ -205,7 +205,7 @@ inline static void free_bucket(DyDictObject *o, bucket_t *bucket)
     	}
 }
 
-static void find_and_remove_bucket(DyDictObject *o, DyObject *key, Dy_hash_t hash)
+static void find_and_remove_bucket(DyDictObject *o, DyObject *key, DyHash hash)
 {
     bucket_t *bucket = &o->table[hash % DY_TABLE_SIZE];
     bucket_t *tbucket = bucket;
@@ -266,7 +266,7 @@ static inline void __KeyError(DyObject *key)
 bool dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
 {
     bucket_t *b;
-    Dy_hash_t hash;
+    DyHash hash;
 
     if (!Dy_HashEx(key, &hash))
     {
@@ -309,12 +309,12 @@ bool dict_setitem(DyDictObject *o, DyObject *key, DyObject *value)
 
 bool dict_contains(DyDictObject *o, DyObject *key)
 {
-    Dy_hash_t hash;
+    DyHash hash;
     return Dy_HashEx(key, &hash) && (find_bucket(o, key, hash) != NULL || (o->parent && dict_contains(o->parent, key)));
 }
 
 // Get key
-DyObject *dict_get(DyDictObject *self, DyObject *key, Dy_hash_t hash)
+DyObject *dict_get(DyDictObject *self, DyObject *key, DyHash hash)
 {
     bucket_t *b;
 
@@ -327,7 +327,7 @@ DyObject *dict_get(DyDictObject *self, DyObject *key, Dy_hash_t hash)
 
 DyObject *dict_getitemu(DyDictObject *self, DyObject *key)
 {
-    Dy_hash_t hash;
+    DyHash hash;
 
     if (!Dy_HashEx(key, &hash))
     {

@@ -34,7 +34,7 @@
 #include <inttypes.h>
 
 
-void Dy_InitObject(DyObject *o, DyObject_Type t)
+void Dy_InitObject(DyObject *o, DyObjectType t)
 {
     o->refcnt = 1;
     o->type = t;
@@ -184,12 +184,12 @@ void Dy_FreeObject(DyObject *o)
 }
 
 
-DyObject_Type Dy_Type(DyObject *o)
+DyObjectType Dy_Type(DyObject *o)
 {
     return o->type;
 }
 
-bool Dy_HashEx(DyObject *self, Dy_hash_t *hash)
+bool Dy_HashEx(DyObject *self, DyHash *hash)
 {
     switch(self->type)
     {
@@ -204,9 +204,9 @@ bool Dy_HashEx(DyObject *self, Dy_hash_t *hash)
     }
 }
 
-Dy_hash_t Dy_Hash(DyObject *self)
+DyHash Dy_Hash(DyObject *self)
 {
-    Dy_hash_t result;
+    DyHash result;
     if (!Dy_HashEx(self, &result))
     {
     	DyErr_Set(DY_ERRID_NOT_HASHABLE, "Object is not hashable.");

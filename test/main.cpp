@@ -83,6 +83,17 @@ int _main(void)
     obj["test"]();
     obj2["test"]();
 
+    Dy_Print("-------------------------");
+
+    Dy::Object obj3 = Dy::dict({
+        {"Hello", "World"},
+        {"Good", "Morning"},
+    });
+    Dy_Print(obj3);
+
+    Dy::Object lst {"a", "b", "c", 1, 2, 3};
+    Dy_Print(lst);
+
     return 0;
 }
 
@@ -94,6 +105,7 @@ int main(void)
     catch (Dy::Exception &e)
     {
         std::cerr << e.errid() << ": " << e.what() << std::endl;
+        e.clear();
         return 1;
     }
 }

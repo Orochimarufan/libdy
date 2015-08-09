@@ -45,8 +45,7 @@ LIBDY_API DyObject *DyUser_CreateNamed(void *data, const char *name);
 LIBDY_API const char *DyUser_GetName(DyObject *self);
 LIBDY_API void *DyUser_GetData(DyObject *self);
 
-typedef void (*DyUser_Destructor)(void *data);
-LIBDY_API bool DyUser_SetDestructor(DyObject *ud, DyUser_Destructor fn);
+LIBDY_API bool DyUser_SetDestructor(DyObject *ud, DyDataDestructor fn);
 
 /* Callables
  * 

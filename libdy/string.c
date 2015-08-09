@@ -75,7 +75,7 @@ void string_destroy(DyStringObject *o)
         string_unintern(o);
 }
 
-Dy_hash_t string_hash(DyStringObject *o)
+DyHash string_hash(DyStringObject *o)
 {
     if (!o->flags & DYSTRING_HASH)
     {

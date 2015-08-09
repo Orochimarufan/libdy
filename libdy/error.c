@@ -24,12 +24,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+
 typedef struct _DyExceptionObject {
     DyObject_HEAD
     const char *errid;
     DyObject *cause;
     void *data;
-    void(*destruct_fn)(void*);
+    DyDataDestructor destruct_fn;
     char message[1];
 } DyExceptionObject;
 
@@ -46,32 +47,27 @@ void DyErr_Clear()
     dy_error_state = NULL;
 }
 
-static inline DyObject *DyErr_NewExceptionX(const char *errid, size_t message_size, void *arg)
+static inline DyObject *DyErr_NewExceptionX(const char *errid, size_t message_size, void *arg, DyDataDestructor fn)
 {
     DyExceptionObject *self = dy_malloc(sizeof(DyExceptionObject) + message_size);
     Dy_InitObject((DyObject*)self, DY_EXCEPTION);
     self->errid = errid;
     self->cause = NULL;
     self->data = arg;
-    self->destruct_fn = NULL;
+    self->destruct_fn = fn;
     return (DyObject *)self;
 }
 
-static inline DyObject *DyErr_NewException(const char *errid, const char *message, void *arg)
+static inline DyObject *DyErr_NewException(const char *errid, const char *message, void *arg, DyDataDestructor fn)
 {
-    DyObject *self = DyErr_NewExceptionX(errid, strlen(message), arg);
+    DyObject *self = DyErr_NewExceptionX(errid, strlen(message), arg, fn);
     strcpy(((DyExceptionObject *)self)->message, message);
     return self;
 }
 
 DyObject *DyErr_Set(const char *errid, const char *message)
 {
-    return DyErr_SetObject(Dy_Pass(DyErr_NewException(errid, message, NULL)));
-}
-
-DyObject *DyErr_SetEx(const char *errid, const char *message, void *data)
-{
-    return DyErr_SetObject(Dy_Pass(DyErr_NewException(errid, message, data)));
+    return DyErr_SetObject(Dy_Pass(DyErr_NewException(errid, message, NULL, NULL)));
 }
 
 DyObject *DyErr_Format(const char *errid, const char *format, ...)
@@ -81,7 +77,7 @@ DyObject *DyErr_Format(const char *errid, const char *format, ...)
     size_t len = vsnprintf(NULL, 0, format, va);
     va_end(va);
     
-    DyObject *e = DyErr_NewExceptionX(errid, len + 1, NULL);
+    DyObject *e = DyErr_NewExceptionX(errid, len + 1, NULL, NULL);
     
     va_start(va, format);
     vsnprintf(((DyExceptionObject*)e)->message, len + 1, format, va);
@@ -89,6 +85,22 @@ DyObject *DyErr_Format(const char *errid, const char *format, ...)
 
     DyErr_SetObject(Dy_Pass(e));
     
+    return e;
+}
+
+DyObject *DyErr_FormatV(const char *errid, const char *format, va_list args)
+{
+    va_list va;
+    va_copy(va, args);
+    size_t len = vsnprintf(NULL, 0, format, va);
+    va_end(va);
+
+    DyObject *e = DyErr_NewExceptionX(errid, len + 1, NULL, NULL);
+
+    vsnprintf(((DyExceptionObject*)e)->message, len + 1, format, args);
+
+    DyErr_SetObject(Dy_Pass(e));
+
     return e;
 }
 
@@ -109,7 +121,7 @@ DyObject *DyErr_DiscardAndSetObject(DyObject *exception)
     return exception;
 }
 
-bool DyErr_SetExceptionData(DyObject *exception, void *data, void (*fn)(void*))
+bool DyErr_SetExceptionData(DyObject *exception, void *data, DyDataDestructor fn)
 {
     if (DyErr_CheckArg("DyErr_SetExceptionData", 0, DY_EXCEPTION, exception))
         return false;
@@ -142,19 +154,19 @@ const char *DyObject_Type_Names[] = {
 DyObject *DyErr_SetArgumentTypeError(const char *fname, int arg_num, const char *expected, const char *got)
 {
     size_t length = strlen(fname) + 10 + strlen(expected) + strlen(got);
-    DyObject *self = DyErr_NewExceptionX(DY_ERRID_ARGUMENT_TYPE, length, NULL);
+    DyObject *self = DyErr_NewExceptionX(DY_ERRID_ARGUMENT_TYPE, length, NULL, NULL);
     snprintf(((DyExceptionObject *)self)->message, length, "%s(): Argument %i: expected %s but got %s object.", fname, arg_num, expected, got);
     return DyErr_SetObject(Dy_Pass(self));
 }
 
-DyObject *DyErr_CheckArg(const char *fname, int arg, DyObject_Type expected, DyObject *got)
+DyObject *DyErr_CheckArg(const char *fname, int arg, DyObjectType expected, DyObject *got)
 {
     if (got->type != expected)
         return DyErr_SetArgumentTypeError(fname, arg, DyObject_Type_Names[expected], DyObject_Type_Names[got->type]);
     return NULL;
 }
 
-const char *Dy_GetTypeName(DyObject_Type t)
+const char *Dy_GetTypeName(DyObjectType t)
 {
     return DyObject_Type_Names[t];
 }

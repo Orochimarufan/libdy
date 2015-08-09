@@ -43,7 +43,7 @@ extern "C" {
 // ----------------------------------------------------------------------------
 ///@{
 ///@name String Hashing
-typedef Dy_hash_t (*Dy_string_hash_fn)(const char *data, size_t length);
+typedef DyHash (*Dy_string_hash_fn)(const char *data, size_t length);
 
 /**
  * @brief Specify the hash function used for strings
@@ -55,8 +55,8 @@ LIBDY_API void DyHost_SetHashFunc(Dy_string_hash_fn func);
 
 ///@{
 ///@name Predefined hash functions:
-LIBDY_API Dy_hash_t Dy_hash_fnv1(const char *data, size_t length);
-LIBDY_API Dy_hash_t Dy_hash_Murmur3_32(const char *data, size_t length);
+LIBDY_API DyHash Dy_hash_fnv1(const char *data, size_t length);
+LIBDY_API DyHash Dy_hash_Murmur3_32(const char *data, size_t length);
 ///@}
 
 ///@}

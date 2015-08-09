@@ -22,7 +22,7 @@
 
 namespace Dy {
 
-void throw_exception(const char *errid, const char *message, void *data=NULL);
+void throw_exception(const char *errid, const char *message);
 
 namespace conv {
 
@@ -33,10 +33,10 @@ inline DyObject *from_value(long number)
     return DyLong_New(number);
 }
 
-inline DyObject *from_value(double floating)
-{
-    return DyFloat_New(floating);
-}
+//inline DyObject *from_value(double floating)
+//{
+//    return DyFloat_New(floating);
+//}
 
 inline DyObject *from_value(const char *str)
 {

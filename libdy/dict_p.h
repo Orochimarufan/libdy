@@ -30,7 +30,7 @@
  */
 // A bucket
 typedef struct bucket_t {
-    Dy_hash_t hash;
+    DyHash hash;
     struct _DyObject *key;
     struct _DyObject *value;
     struct bucket_t *next;
@@ -63,7 +63,7 @@ bool dict_clean(DyDictObject *self);
 
 struct dy_buildstring_t *dict_bsrepr(struct dy_buildstring_t *bs, DyDictObject *self);
 
-DyObject *dict_get(DyDictObject *o, DyObject *key, Dy_hash_t hash);
+DyObject *dict_get(DyDictObject *o, DyObject *key, DyHash hash);
 
 DyObject *dict_getitem(DyDictObject *self, DyObject *key);
 DyObject *dict_getitemu(DyDictObject *self, DyObject *key);

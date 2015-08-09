@@ -57,7 +57,7 @@ DyObject *DyString_Interned(DyObject *o)
         return o;
 
     DyStringObject *str = ((DyStringObject *)o);
-    Dy_hash_t hash = string_hash(str);
+    DyHash hash = string_hash(str);
     si_bucket_t *bucket = &DyIntern.table[hash % DY_INTERN_TABLE_SIZE];
 
     if (!bucket->item)
@@ -77,7 +77,7 @@ DyObject *DyString_Interned(DyObject *o)
 DyObject *DyString_InternedString(const char *s)
 {
     size_t size = strlen(s);
-    Dy_hash_t hash = DyHost.string_hash_fn(s, size);
+    DyHash hash = DyHost.string_hash_fn(s, size);
     si_bucket_t *bucket = &DyIntern.table[hash % DY_INTERN_TABLE_SIZE];
 
     if (!bucket->item)
@@ -121,7 +121,7 @@ DyObject *DyString_Intern(DyObject *o)
         return o;
 
     DyStringObject *str = ((DyStringObject *)o);
-    Dy_hash_t hash = string_hash(str);
+    DyHash hash = string_hash(str);
     si_bucket_t *bucket = &DyIntern.table[hash % DY_INTERN_TABLE_SIZE];
     si_bucket_t *tbucket = bucket;
 
@@ -157,7 +157,7 @@ void DyString_InternInplace(DyObject **strp);
 // Create new intern string
 DyObject *DyString_InternStringFromStringAndSize(const char *s, size_t size)
 {
-    Dy_hash_t hash = DyHost.string_hash_fn(s, size);
+    DyHash hash = DyHost.string_hash_fn(s, size);
     si_bucket_t *bucket = &DyIntern.table[hash % DY_INTERN_TABLE_SIZE];
     si_bucket_t *tbucket = bucket;
 
@@ -210,7 +210,7 @@ inline static void si_free_bucket(si_bucket_t *bucket)
 void string_unintern(DyStringObject *o) // See also dict.c:find_and_remove_bucket()
 {
     DyStringObject *str = ((DyStringObject *)o);
-    Dy_hash_t hash = string_hash(str);
+    DyHash hash = string_hash(str);
     si_bucket_t *bucket = &DyIntern.table[hash % DY_INTERN_TABLE_SIZE];
     si_bucket_t *tbucket = bucket;
     si_bucket_t *prev;

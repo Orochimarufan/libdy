@@ -26,6 +26,7 @@
 #include "types.h"
 #include "config.h"
 
+#include <stdarg.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -74,17 +75,6 @@ LIBDY_API void        DyErr_Clear();
 LIBDY_API DyObject *  DyErr_Set(const char *errid, const char *message);
 
 /**
- * @brief Set the thread error state
- * @param errid The error id
- * @param message A human-readable message
- * @param data Custom data to pass along with the exception
- * @return A pointer to the exception object
- * @sa DyErr_Set
- * @deprecated Use DyErr_SetExceptionData instead.
- */
-LIBDY_API DyObject *    DyErr_SetEx(const char *errid, const char *message, void *data);
-
-/**
  * @brief Set the thread error state, constructing the message
  * @param errid The error id
  * @param format The printf format
@@ -92,6 +82,16 @@ LIBDY_API DyObject *    DyErr_SetEx(const char *errid, const char *message, void
  * @sa DyErr_Set
  */
 LIBDY_API DyObject *    DyErr_Format(const char *errid, const char *format, ...);
+
+/**
+ * @brief Set the thread error state, constructing the message (va_list version)
+ * @param errid The error id
+ * @param format The printf format
+ * @param args The vprintf va_list
+ * @return A pointer to the exception object
+ * @sa DyErr_Set
+ */
+LIBDY_API DyObject *    DyErr_FormatV(const char *errid, const char *format, va_list args);
 
 /**
  * @brief Set the error state to an Exception object.
@@ -119,7 +119,7 @@ LIBDY_API DyObject *  DyErr_DiscardAndSetObject(DyObject *exception);
  * @return false with exception set on error
  * @warning Only use once, otherwise the first destructor never gets called.
  */
-LIBDY_API bool DyErr_SetExceptionData(DyObject *exception, void *data, void(*destructor)(void*));
+LIBDY_API bool DyErr_SetExceptionData(DyObject *exception, void *data, DyDataDestructor destructor);
 
 // Argument checking helpers
 /**
@@ -143,7 +143,7 @@ LIBDY_API DyObject *  DyErr_SetArgumentTypeError(const char *fname, int arg, con
  *
  * Throws an ArgumentTypeError if the type of \c got is not \c expected.
  */
-LIBDY_API DyObject *  DyErr_CheckArg(const char *fname, int arg, DyObject_Type expected, DyObject *got);
+LIBDY_API DyObject *  DyErr_CheckArg(const char *fname, int arg, DyObjectType expected, DyObject *got);
 
 // Memory Error
 /**

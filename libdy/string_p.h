@@ -29,7 +29,7 @@ typedef struct _DyStringObject {
     DyObject_HEAD;
     uint32_t size;
     uint8_t flags;
-    Dy_hash_t hash;
+    DyHash hash;
     char data[1];
 } DyStringObject;
 
@@ -42,6 +42,6 @@ DyStringObject *string_new_ex(size_t size);
 void string_unintern(DyStringObject *);
 void string_destroy(DyStringObject *self);
 
-Dy_hash_t string_hash(DyStringObject *self);
+DyHash string_hash(DyStringObject *self);
 
 struct dy_buildstring_t *string_bsrepr(struct dy_buildstring_t *bs, DyStringObject *self);
