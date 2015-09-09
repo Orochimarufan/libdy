@@ -19,7 +19,7 @@
 # NOTE: The CMake build of PyDy (libdy-python) is to be linked into programs
 #       embedding python
 
-project(pydy)
+project(libdy-python)
 set(LIBDYPYTHON_VERSION "0.1.0")
 set(LIBDYPYTHON_SOVERSION 0)
 
@@ -68,6 +68,12 @@ configure_file(libdy-pythonConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_D
 configure_file(libdy-pythonConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/libdy-pythonConfigVersion.cmake" @ONLY)
 
 # install CMake configs
+if (WIN32 AND NOT CYGWIN)
+    set(LIB_CMAKE_PATH "cmake")
+else()
+    set(LIB_CMAKE_PATH "lib/cmake/libdy-python")
+endif()
+
 install(EXPORT libdy-pythonTargets DESTINATION "${LIB_CMAKE_PATH}" COMPONENT python-dev)
 install(FILES
         "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libdy-pythonConfig.cmake"

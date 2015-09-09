@@ -108,6 +108,12 @@ configure_file(libdyConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTOR
 configure_file(libdyConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/libdyConfigVersion.cmake" @ONLY)
 
 # install CMake configs
+if (WIN32 AND NOT CYGWIN)
+    set(LIB_CMAKE_PATH "cmake")
+else()
+    set(LIB_CMAKE_PATH "lib/cmake/libdy")
+endif()
+
 install(EXPORT libdyTargets DESTINATION "${LIB_CMAKE_PATH}" COMPONENT core-dev)
 install(FILES
         "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libdyConfig.cmake"

@@ -68,6 +68,12 @@ configure_file(libdy++Config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECT
 configure_file(libdy++ConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/libdy++ConfigVersion.cmake" @ONLY)
 
 # install CMake configs
+if (WIN32 AND NOT CYGWIN)
+    set(LIB_CMAKE_PATH "cmake")
+else()
+    set(LIB_CMAKE_PATH "lib/cmake/libdy++")
+endif()
+
 install(EXPORT libdy++Targets DESTINATION "${LIB_CMAKE_PATH}" COMPONENT c++-dev)
 install(FILES
         "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libdy++Config.cmake"
