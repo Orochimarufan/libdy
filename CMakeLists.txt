@@ -32,6 +32,13 @@ ELSEIF(MINGW)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1y")
 ENDIF()
 
+if (WIN32 AND NOT CYGWIN)
+    set(LIB_CMAKE_PATH "cmake")
+else()
+    set(LIB_CMAKE_PATH "lib/cmake/libdy")
+endif()
+
 add_subdirectory(libdy)
 add_subdirectory(libdy++)
+add_subdirectory(pydy)
 add_subdirectory(test EXCLUDE_FROM_ALL)

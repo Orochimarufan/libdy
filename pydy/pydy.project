@@ -94,6 +94,9 @@
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
+    <File Name="CMakeLists.txt"/>
+    <File Name="libdy-pythonConfig.cmake.in"/>
+    <File Name="libdy-pythonConfigVersion.cmake.in"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="pydy.h"/>

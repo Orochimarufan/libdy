@@ -1,0 +1,12 @@
+# CMake Config file for the libdy++ project
+set(LIBDYPYTHON_VERSION "@LIBDYPYTHON_VERSION@")
+set(LIBDYPYTHON_SOVERSION "@LIBDYPYTHON_SOVERSION@")
+
+get_filename_component(LIBDYPYTHON_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(LIBDYPYTHON_INCLUDE_DIRS "@INCLUDE_DIRS@")
+
+if (NOT TARGET libdy-python)
+    include("${LIBDYPP_CMAKE_DIR}/libdy-pythonTargets.cmake")
+endif()
+
+set(LIBDYPYTHON_LIBRARIES libdy-python)
