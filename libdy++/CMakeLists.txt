@@ -41,6 +41,7 @@ set_target_properties(libdy++ PROPERTIES
     OUTPUT_NAME dy++
     VERSION "${LIBDYPP_VERSION}"
     SOVERSION "${LIBDYPP_SOVERSION}"
+    PUBLIC_HEADER "${HEADERS}"
 )
 
 # Install

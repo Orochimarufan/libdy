@@ -30,7 +30,7 @@ set(PRIVATE_HEADERS
     userdata_p.h
 )
 
-set(headers
+set(HEADERS
     config.h
     runtime.h
 
@@ -77,6 +77,7 @@ set_target_properties(libdy PROPERTIES
     OUTPUT_NAME dy
     VERSION "${LIBDY_VERSION}"
     SOVERSION "${LIBDY_SOVERSION}"
+    PUBLIC_HEADER "${HEADERS}"
 )
 
 if (UNIX AND NOT APPLE)
