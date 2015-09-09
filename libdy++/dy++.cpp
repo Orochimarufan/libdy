@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dypp.h"
+#include "dy++.h"
 
 #include <libdy/exceptions.h>
 

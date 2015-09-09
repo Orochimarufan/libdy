@@ -1,0 +1,12 @@
+# CMake Config file for the libdy++ project
+set(LIBDYPP_VERSION "@LIBDYPP_VERSION@")
+set(LIBDYPP_SOVERSION "@LIBDYPP_SOVERSION@")
+
+get_filename_component(LIBDYPP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(LIBDYPP_INCLUDE_DIRS "@INCLUDE_DIRS@")
+
+if (NOT TARGET libdy++)
+    include("${LIBDYPP_CMAKE_DIR}/libdy++Targets.cmake")
+endif()
+
+set(LIBDYPP_LIBRARIES libdy++)

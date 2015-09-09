@@ -64,6 +64,9 @@
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
     <File Name="Doxyfile"/>
+    <File Name="CMakeLists.txt"/>
+    <File Name="libdyConfig.cmake.in"/>
+    <File Name="libdyConfigVersion.cmake.in"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
     <GlobalSettings>

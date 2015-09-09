@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "dypp.h"
-#include "dypp_conv.h"
+#include "dy++.h"
+#include "dy++conv.h"
 
 #include <libdy/userdata.h>
 

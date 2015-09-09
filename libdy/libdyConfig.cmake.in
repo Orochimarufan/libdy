@@ -1,0 +1,12 @@
+# CMake Config file for the libdy project
+set(LIBDY_VERSION "@LIBDY_VERSION@")
+set(LIBDY_SOVERSION "@LIBDY_SOVERSION@")
+
+get_filename_component(LIBDY_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(LIBDY_INCLUDE_DIRS "@INCLUDE_DIRS@")
+
+if (NOT TARGET libdy)
+    include("${LIBDY_CMAKE_DIR}/libdyTargets.cmake")
+endif()
+
+set(LIBDY_LIBRARIES libdy)

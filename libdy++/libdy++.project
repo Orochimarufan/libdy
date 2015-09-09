@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="libdypp" InternalType="Library">
+<CodeLite_Project Name="libdy++" InternalType="Library">
   <Description/>
   <Dependencies/>
   <Settings Type="Dynamic Library">
@@ -89,16 +89,19 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="libdypp">
-    <File Name="dypp.cpp"/>
+  <VirtualDirectory Name="libdy++">
+    <File Name="dy++.cpp"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="include/libdypp">
-    <File Name="dypp.h"/>
-    <File Name="dypp_conv.h"/>
+  <VirtualDirectory Name="include/libdy++">
     <File Name="callable.h"/>
-    <File Name="dypp_impl.h"/>
+    <File Name="dy++.h"/>
+    <File Name="dy++conv.h"/>
+    <File Name="dy++impl.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
+    <File Name="CMakeLists.txt"/>
+    <File Name="libdy++ConfigVersion.cmake.in"/>
+    <File Name="libdy++Config.cmake.in"/>
   </VirtualDirectory>
 </CodeLite_Project>

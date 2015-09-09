@@ -27,6 +27,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
+    <File Name="CMakeLists.txt"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

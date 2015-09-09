@@ -20,8 +20,8 @@
 #include <iostream>
 #include <functional>
 
-#include <libdypp/dypp.h>
-#include <libdypp/callable.h>
+#include <libdy++/dy++.h>
+#include <libdy++/callable.h>
 #include <libdy/userdata.h>
 
 void Dy_Print(const Dy::Object &o)

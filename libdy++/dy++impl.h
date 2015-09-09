@@ -20,7 +20,7 @@
 
 #include <libdy/object.h> // TODO: keep the C symbols separate?
 #include <libdy/collections.h>
-#include "dypp_conv.h" // TODO: maybe make this opt-in?
+#include "dy++conv.h" // TODO: maybe make this opt-in?
 
 // Included from dypp.h
 
@@ -32,7 +32,7 @@ template <typename First, typename... More>
 inline void appendToList(Object &list, First arg, More... args)
 {
     DyList_Append(list.get(), Dy_Pass(conv::from_value_or_ref(arg)));
-    
+
     appendToList(list, args...);
 }
 
@@ -46,9 +46,9 @@ template <typename... Args>
 inline Object makeList(Args... args)
 {
     Object list = Object(DyList_New(), true);
-    
+
     appendToList(list, args...);
-    
+
     return list;
 }
 

@@ -15,7 +15,7 @@ out = "build"
 path.insert(0, "local_waflib")
 
 # Sub-Projects
-projects = "libdy", "libdypp", "test", "pydy"
+projects = "libdy", "libdy++", "test", "pydy"
 
 
 def init(ctx):

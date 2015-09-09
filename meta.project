@@ -63,4 +63,7 @@
     <File Name="local_waflib/local_rpath.py"/>
     <File Name="local_waflib/doxygen.py"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="cmake">
+    <File Name="CMakeLists.txt"/>
+  </VirtualDirectory>
 </CodeLite_Project>
