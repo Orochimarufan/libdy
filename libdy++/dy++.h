@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "util.h"
+
 #include <libdy/types.h>
 
 #include <exception>
@@ -188,11 +190,6 @@ public:
 
     void clear();
 };
-
-void throw_exception();
-void throw_exception(DyObject *exception);
-void throw_exception(const char *errid, const char *message);
-void format_exception(const char *errid, const char *format, ...);
 
 template <typename... Args>
 inline Object makeList(Args... args);

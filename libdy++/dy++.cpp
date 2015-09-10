@@ -22,8 +22,7 @@
 
 #include <csignal>
 
-#define __TRAP__ //std::raise(SIGTRAP);
-//#define __TRAP__
+#define __TRAP__ std::raise(SIGTRAP);
 
 namespace Dy {
 

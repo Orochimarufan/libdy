@@ -21,12 +21,15 @@ set(LIBDYPP_VERSION "0.1.0")
 set(LIBDYPP_SOVERSION 0)
 
 set(HEADERS
-    callable.h
-
-    dy++conv.h
+    util.h
 
     dy++impl.h
     dy++.h
+
+    callable.h
+
+    dy++conv.h
+    dy++qt.h
 )
 
 set(SOURCES

@@ -27,6 +27,10 @@
 
 namespace Dy {
 
+namespace util {
+    using safe_dy_ptr = safe_ptr<DyObject, Dy_Release>;
+}
+
 // Generic functions
 template <typename First, typename... More>
 inline void appendToList(Object &list, First arg, More... args)

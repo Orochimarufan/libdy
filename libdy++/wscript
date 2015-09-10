@@ -2,7 +2,7 @@
 # :vim set ft=python
 
 headers = ()
-public_headers = "dy++.h", "dy++impl.h", "dy++conv.h", "callable.h"
+public_headers = "dy++.h", "dy++impl.h", "dy++conv.h", "callable.h", "util.h"
 sources = "dy++.cpp",
 
 def options(opt):

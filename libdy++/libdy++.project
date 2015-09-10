@@ -97,6 +97,8 @@
     <File Name="dy++.h"/>
     <File Name="dy++conv.h"/>
     <File Name="dy++impl.h"/>
+    <File Name="dy++qt.h"/>
+    <File Name="util.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>
