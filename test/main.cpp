@@ -76,6 +76,17 @@ int _main(void)
     dict2["method"]();
     dict2["print"](dict["return"]());
 
+    puts("--------------------------------");
+
+    Dy::util::safe_ptr<DyDict_IterPair*, DyDict_IterFree> it = DyDict_Iter(dict.get());
+    if (!it)
+        Dy::throw_exception();
+    while(*it)
+    {
+        Dy_Print((*it)->key);
+        DyDict_IterNext(it);
+    }
+
     return 0;
 }
 

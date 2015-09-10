@@ -106,6 +106,37 @@ LIBDY_API DyObject *DyDict_NewWithParent(DyObject *parent);
  */
 LIBDY_API bool      DyDict_Clear(DyObject *self);
 
+/**
+ * @brief Structure for storing a key-value pair
+ */
+typedef struct DyDict_IterPair {
+    DyObject *key;
+    DyObject *value;
+} DyDict_IterPair;
+
+/**
+ * @brief Create a dictionary iterator
+ * @param self The dictionary
+ * @note Returns a pointer to NULL if dictionary is empty!
+ */
+LIBDY_API DyDict_IterPair **DyDict_Iter(DyObject *self);
+
+/**
+ * @brief Advance a dictionary iterator
+ * @param iterator The iterator
+ * @return FALSE if the iterator is finished
+ * @warning Modifying either the iterator or the collection results in
+ *          undefined behaviour!
+ */
+LIBDY_API bool DyDict_IterNext(DyDict_IterPair **iterator);
+
+/**
+ * @brief Free the iterator memory
+ * @param iterator The iterator
+ */
+LIBDY_API void DyDict_IterFree(DyDict_IterPair **iterator);
+
+
 ///@}
 // ----------------------------------------------------------------------------
 ///@{

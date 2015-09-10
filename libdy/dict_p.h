@@ -57,6 +57,13 @@ typedef struct _DyDictObject {
     struct bucket_t table[DY_TABLE_SIZE];
 } DyDictObject;
 
+typedef struct _DyDictIterator {
+    struct DyDict_IterPair *entry; // is bucket_t.key
+
+    struct _DyDictObject *dict;
+    struct bucket_t *table_block;
+} DyDictIterator;
+
 // Prototypes
 void dict_destroy(DyDictObject *self);
 bool dict_clean(DyDictObject *self);

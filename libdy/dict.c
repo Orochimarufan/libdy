@@ -24,6 +24,7 @@
 #include "string_p.h"
 
 #include <stdio.h>
+#include <stddef.h>
 
 
 bool DyDict_Check(DyObject *self)
@@ -38,11 +39,14 @@ static bucket_t *find_or_create_bucket(DyDictObject *, DyObject *key, DyHash has
 // Implementation
 static inline void dict_init(DyDictObject *o)
 {
+    o->parent = NULL;
+    o->blocks = NULL;
+    memset(o->table, 0, sizeof(bucket_t) * DY_TABLE_SIZE);
 }
 
 DyObject *DyDict_New()
 {
-    DyDictObject *self = NEW(DyDictObject);
+    DyDictObject *self = dy_malloc(sizeof(DyDictObject));
     if (!self)
     {
         DyErr_SetMemoryError();
@@ -60,7 +64,7 @@ DyObject *DyDict_NewWithParent(DyObject *parent)
     if (DyErr_CheckArg("DyDict_NewWithParent", 1, DY_DICT, parent))
         return_null;
 
-    DyDictObject *self = NEW(DyDictObject);
+    DyDictObject *self = dy_malloc(sizeof(DyDictObject));
     if (!self)
     {
         DyErr_SetMemoryError();
@@ -132,7 +136,7 @@ static bucket_t *find_bucket(DyDictObject *o, DyObject *key, DyHash hash)
         return NULL;
 
     // Find in chain
-    do if (/*hash == bucket->hash &&*/ Dy_Equals(key, bucket->key))
+    do if ((!bucket->hash || hash == bucket->hash) && Dy_Equals(key, bucket->key))
             return bucket;
     while ((bucket = bucket->next));
 
@@ -416,4 +420,65 @@ dy_buildstring_t *dict_bsrepr(dy_buildstring_t *bs, DyDictObject *self)
     }
 
     return lbs;
+}
+
+// Get pointer to containing structure from member pointer
+#define container_of(ptr, type, member) ({ \
+    char *__mptr = (char *)(ptr); \
+    (type *)( __mptr - offsetof(type, member) ); \
+})
+
+// Iteration -------------------------------------------------------------------
+inline static bool _find_next_table_block(DyDictIterator *it)
+{
+    do // skip empty slots
+    {
+        ++it->table_block;
+        int x = it->table_block - it->dict->table;
+        if (it->table_block - it->dict->table >= DY_TABLE_SIZE) // stop after table ends
+        {
+            it->table_block = NULL;
+            it->entry = NULL;
+            return false;
+        }
+    }
+    while (!it->table_block->key);
+    it->entry = (DyDict_IterPair *) &it->table_block->key;
+    return true;
+}
+
+DyDict_IterPair **DyDict_Iter(DyObject *self)
+{
+    if (DyErr_CheckArg("DyDict_Iter", 0, DY_DICT, self))
+        return_null;
+
+    DyDictIterator *it = dy_malloc(sizeof(DyDictIterator));
+    if (!it)
+        DyErr_SetMemoryError();
+
+    it->dict = (DyDictObject *) self;
+    it->table_block = it->dict->table - 1;
+
+    _find_next_table_block(it);
+    return &it->entry;
+}
+
+bool DyDict_IterNext(DyDict_IterPair** itp)
+{
+    DyDictIterator *it = container_of(itp, DyDictIterator, entry);
+    if (!it->table_block)
+        return false;
+
+    bucket_t *bucket = container_of(it->entry, bucket_t, key);
+    if (bucket->next)
+    {
+        it->entry = (DyDict_IterPair *) &bucket->next->key;
+        return true;
+    }
+    return _find_next_table_block(it);
+}
+
+void DyDict_IterFree(DyDict_IterPair **itp)
+{
+    dy_free((DyDictIterator*)itp);
 }
