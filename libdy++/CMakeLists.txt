@@ -36,6 +36,11 @@ set(SOURCES
     dy++.cpp
 )
 
+option(LIBDYPP_TRAP "Raise SIGTRAP when libdy exceptions are encountered in libdy++ (for debugging)" OFF)
+if (LIBDYPP_TRAP)
+add_definitions(-D__LIBDYPP_TRAP)
+endif()
+
 add_definitions(-D__LIBDYPP_LIBRARY)
 include_directories(..)
 add_library(libdy++ SHARED ${HEADERS} ${SOURCES})

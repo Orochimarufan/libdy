@@ -20,9 +20,12 @@
 
 #include <libdy/exceptions.h>
 
+#ifdef __LIBDYPP_TRAP
 #include <csignal>
-
 #define __TRAP__ std::raise(SIGTRAP);
+#else
+#define __TRAP__
+#endif
 
 namespace Dy {
 

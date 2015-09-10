@@ -8,20 +8,32 @@ sources = "dy++.cpp",
 def options(opt):
     opt.load("compiler_cxx")
 
+    opt.add_option("-T", "--trap", action="store_true",
+        help="Raise SIGTRAP when a libdy exception is encountered in dy++")
+
 
 def configure(cnf):
     cnf.load("compiler_cxx")
+
+    if (cnf.options.trap):
+        cnf.env.__LIBDYPP_TRAP = "1"
+    else:
+        cnf.env.__LIBDYPP_TRAP = ""
 
     cnf.write_config_header("config.h")
 
 
 def build(bld):
-    bld.shlib(
-    	source=sources,
-    	target="dy++",
+    defs = ["__LIBDYPP_LIBRARY"]
+    if bld.env.__LIBDYPP_TRAP:
+        defs.append("__LIBDYPP_TRAP")
 
-    	includes=[".", ".."],
-    	defines=["__LIBDYPP_LIBRARY"],
-    	cxxflags=["-std=c++14"],
-    	use="dy"
+    bld.shlib(
+        source=sources,
+        target="dy++",
+
+        includes=[".", ".."],
+        defines=defs,
+        cxxflags=["-std=c++14"],
+        use="dy"
     )
