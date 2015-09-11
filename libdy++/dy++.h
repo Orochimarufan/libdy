@@ -29,6 +29,11 @@
 namespace Dy {
 
 class Object;
+
+class String;
+class List;
+class Dict;
+
 class SubscriptionRef;
 class Exception;
 
@@ -37,8 +42,11 @@ extern const Object None;
 extern const Object True;
 extern const Object False;
 
+// -----------------------------------------------------------------------------
+// Base Object class
 /**
  * @brief Object Reference class.
+ * @warning Polymorphism is NOT supported.
  */
 class Object
 {
@@ -70,22 +78,35 @@ public:
     Object(Object &&object);
 
     /**
+     * @brief Create a reference to Undefined
+     */
+    Object();
+
+    /**
      * @brief Create an Object reference from value
      */
-    template <typename T>
+    template <typename T,
+        typename = typename std::enable_if<!std::is_base_of<Object, T>::value>::type>
     Object(T value);
 
     ~Object();
 
-    // Initializer-construction
-    /**
-     * Construct a libdy list
-     */
-    Object(std::initializer_list<Object> il);
-
     // Type
     DyObjectType type() const;
     const char *type_name() const;
+
+    // Comparison
+    bool operator==(const Object &) const;
+    bool operator!=(const Object &) const;
+
+    DyHash hash();
+
+    // Representation
+    String str() const;
+    String repr() const;
+
+    // Length
+    std::size_t length() const;
 
     // Subscription
     /**
@@ -97,19 +118,6 @@ public:
 
     template <typename T>
     SubscriptionRef operator[] (T);
-
-    // Length
-    std::size_t length() const;
-
-    // Comparison
-    bool operator==(const Object &) const;
-    bool operator!=(const Object &) const;
-
-    DyHash hash();
-
-    // Representation
-    Object str() const;
-    Object repr() const;
 
     // Conversion
     template <typename T>
@@ -127,14 +135,151 @@ public:
     inline Object operator()(Args...);
 };
 
+// -----------------------------------------------------------------------------
+// Type-specific subclasses
+class String : public Object
+{
+    static void typecheck(DyObject *);
+
+public:
+    // Construction
+    String(DyObject *object, bool steal=false);
+    String(const Object &object);
+    //String(Object &&object);
+
+    /**
+     * @brief Create a String object
+     */
+    String(const char *c_str, std::size_t len);
+};
+
+class List : public Object
+{
+    static void typecheck(DyObject *);
+
+public:
+    // Construction
+    List(DyObject *object, bool steal=false);
+    List(const Object &object);
+    //List(Object &&object);
+
+    // Initializer-construction
+    /**
+     * @brief Construct a libdy list
+     */
+    List(std::initializer_list<Object> il);
+
+    /**
+     * @brief Create an empty list
+     */
+    List();
+
+    /**
+     * @brief Create an empty list
+     * @param prealloc Pre-allocate this many items
+     * @sa List()
+     */
+    List(std::size_t prealloc);
+
+    /**
+     * @brief Make a list from all arguments
+     */
+    template <typename... Items>
+    inline static List make(Items...);
+
+    /**
+     * @brief Append an object to the list
+     * @param o The object
+     */
+    inline void append(const Object &o);
+
+    /**
+     * @brief Append all items to the list
+     */
+    template <typename Item, typename... Tail>
+    inline void appendMany(Item, Tail...);
+
+    template <typename Item>
+    inline void appendMany(Item);
+
+    /**
+     * @brief Insert an object into the list
+     * @param at The position to insert at
+     * @param o The Object
+     */
+    inline void insert(std::size_t at, const Object &o);
+
+    /**
+     * @brief Remove all items from the list
+     */
+    inline void clear();
+};
+
+class Dict : public Object
+{
+    static void typecheck(DyObject *);
+
+public:
+    // Construction
+    Dict(DyObject *object, bool steal=false);
+    Dict(const Object &object);
+    //Dict(Object &&object);
+
+    /**
+     * @brief Create a new dictionary
+     * @param il Pass a initializer_list of items
+     * @param parent A dictionary can inherit from another dictionary
+     */
+    Dict(std::initializer_list<std::pair<Object, Object>> il, Object parent=Undefined);
+
+    /**
+     * @brief Create an empty dictionary
+     */
+    Dict();
+
+    /**
+     * @brief Remove all entries from the dictionary
+     */
+    inline void clear();
+
+    class Iterator
+    {
+    public:
+        struct Pair {
+            DyObject *key;
+            DyObject *value;
+        };
+
+    private:
+        Pair **iter;
+
+    public:
+        inline Iterator(const Dict &dct);
+
+        inline Pair *operator *();
+
+        inline Object key();
+        inline Object value();
+
+        inline bool next();
+        inline Iterator &operator++();
+
+        inline ~Iterator();
+    };
+
+    inline Iterator iter();
+};
+
+// -----------------------------------------------------------------------------
+// Special classes
 /**
  * @brief Reference retrieved by subscribing to another object
  * This allows assignments like object["hello"] = "Derp";
  * @note These should be treated as temporary objects only.
- *     	 Storing them (SubscriptionRef x = object["hello"]) does not make sense
- *     	 Be careful about auto x = object["hello"] because it might defer SubscriptionRef
- *     	 as the resulting type. Object x = object["hello"] is preferred.
- * @warning Don't down-cast it to Object, use Object's copy constructor instead!
+ *       Storing them (SubscriptionRef x = object["hello"]) does not make sense
+ *       Be careful about auto x = object["hello"] because it might defer
+ *       SubscriptionRef as the resulting type.
+ *       Object/String/List/Dict x = object["hello"] should be used instead.
  */
 class SubscriptionRef : public Object
 {
@@ -190,19 +335,6 @@ public:
 
     void clear();
 };
-
-template <typename... Args>
-inline Object makeList(Args... args);
-
-template <typename... Args>
-inline void appendToList(Object &list, Args... args);
-
-/**
- * @brief Create a new dictionary
- * @param parent Optional parent dictionary to inherit from
- * @return
- */
-Object dict(std::initializer_list<std::pair<Object, Object>> il, Object parent=Undefined);
 
 }
 

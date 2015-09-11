@@ -46,19 +46,19 @@ const char *rtest()
 
 int _main(void)
 {
-    Dy::Object str("Hello, World");
+    Dy::String str("Hello, World");
 
     puts(str);
 
-    Dy::Object dict = Dy::dict({
+    Dy::Dict dict{
         {"hello", Dy::function(::hello)},
         {"method", Dy::method(::test_method)},
         {"return", Dy::function(::rtest)},
         {"text", "Yo!"},
-    });
+    };
 
-    Dy::Object dict2 = Dy::dict({
-        {1, {2, 3, 4, 5, "and more"}},
+    Dy::Dict dict2({
+        {1, Dy::List{2, 3, 4, 5, "and more"}},
         {"print", Dy::function(::Dy_Print)},
     }, dict);
 
@@ -78,14 +78,8 @@ int _main(void)
 
     puts("--------------------------------");
 
-    Dy::util::safe_ptr<DyDict_IterPair*, DyDict_IterFree> it = DyDict_Iter(dict.get());
-    if (!it)
-        Dy::throw_exception();
-    while(*it)
-    {
-        Dy_Print((*it)->key);
-        DyDict_IterNext(it);
-    }
+    for (auto it = dict.iter(); *it; ++it)
+        Dy_Print(it.key());
 
     return 0;
 }

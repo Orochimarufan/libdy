@@ -135,13 +135,11 @@ inline DyObject *from_value_or_ref(T value)
     return from_value(value);
 }
 
-template <>
 inline DyObject *from_value_or_ref(DyObject *o)
 {
     return Dy_Retain(o);
 }
 
-template <>
 inline DyObject *from_value_or_ref(const Object &o)
 {
     return Dy_Retain(o.get());

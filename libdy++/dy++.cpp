@@ -20,6 +20,8 @@
 
 #include <libdy/exceptions.h>
 
+#include <initializer_list>
+
 #ifdef __LIBDYPP_TRAP
 #include <csignal>
 #define __TRAP__ std::raise(SIGTRAP);
@@ -71,30 +73,14 @@ Object::Object(Object &&object) :
     object.d = Dy_Retain(Dy_Undefined);
 }
 
-
-Object::Object(std::initializer_list<Object> il) :
-    d(0)
+Object::Object() :
+    d(Dy_Retain(Dy_Undefined))
 {
-    assign(DyList_NewEx(il.size()), true);
-
-    for (decltype(il)::const_iterator i = il.begin(); i != il.end(); ++i)
-        if (!DyList_Append(d, i->get()))
-            throw_exception();
 }
 
-Object dict(std::initializer_list<std::pair<Object, Object>> il, Object parent)
+Dict dict(std::initializer_list<std::pair<Object, Object>> il, Object parent)
 {
-    DyObject *o;
-    if (parent != Undefined)
-        o = DyDict_NewWithParent(parent.get());
-    else
-        o = DyDict_New();
-
-    for (decltype(il)::const_iterator i = il.begin(); i != il.end(); ++i)
-        if (!Dy_SetItem(o, i->first.get(), i->second.get()))
-            throw_exception();
-
-    return Dy_Pass(o);
+    return Dict(il, parent);
 }
 
 // Destruction
@@ -121,14 +107,14 @@ size_t Object::length() const
 }
 
 // Representation
-Object Object::str() const
+String Object::str() const
 {
-    return Object(Dy_Str(d), true);
+    return String(Dy_Str(d), true);
 }
 
-Object Object::repr() const
+String Object::repr() const
 {
-    return Object(Dy_Repr(d), true);
+    return String(Dy_Repr(d), true);
 }
 
 // Comparison
@@ -160,6 +146,87 @@ SubscriptionRef Object::operator[] (::DyObject *key)
 {
     return SubscriptionRef(d, key);
 }
+
+// Subtypes --------------------------------------------------------------------
+#define SUBTYPE_CONSTRUCTORS(stname) \
+stname::stname(DyObject *obj, bool steal) \
+    : Object(obj, steal) \
+{ \
+    typecheck(obj); \
+} \
+stname::stname(const Object &obj) \
+    : Object(obj) \
+{ \
+    typecheck(obj.get()); \
+}
+/*stname::stname(Object &&obj) \
+{ \
+    typecheck(obj.get()); \
+    assign(obj.get(), true); \
+    obj.d = Dy_Retain(Dy_Undefined); \
+}*/
+
+#define SUBTYPE_TYPECHECK(stname, want_type) \
+void stname::typecheck(DyObject *obj) \
+{ \
+    if (Dy_Type(obj) != want_type) \
+        format_exception(LIBDY_ERROR_CXX_TYPE_ERROR, "Cannot create Dy::" # stname " from %s", Dy_GetTypeName(Dy_Type(obj))); \
+}
+
+// String
+SUBTYPE_CONSTRUCTORS(String)
+SUBTYPE_TYPECHECK(String, DY_STRING)
+
+String::String(const char *c_str, std::size_t len) :
+    Object(DyString_FromStringAndSize(c_str, len), true)
+{}
+
+// List
+SUBTYPE_CONSTRUCTORS(List)
+SUBTYPE_TYPECHECK(List, DY_LIST)
+
+List::List(std::initializer_list<Object> il) :
+    Object(DyList_NewEx(il.size()), true)
+{
+    for (decltype(il)::const_iterator i = il.begin(); i != il.end(); ++i)
+        if (!DyList_Append(d, i->get()))
+            throw_exception();
+}
+
+List::List() :
+    Object(DyList_New(), true)
+{}
+
+List::List(std::size_t prealloc) :
+    Object(DyList_NewEx(prealloc), true)
+{}
+
+// Dict
+SUBTYPE_CONSTRUCTORS(Dict)
+SUBTYPE_TYPECHECK(Dict, DY_DICT)
+
+Dict::Dict(std::initializer_list<std::pair<Object, Object>> il, Object parent)
+{
+    DyObject *o;
+    if (parent != Undefined)
+        o = DyDict_NewWithParent(parent.get());
+    else
+        o = DyDict_New();
+
+    for (decltype(il)::const_iterator i = il.begin(); i != il.end(); ++i)
+        if (!Dy_SetItem(o, i->first.get(), i->second.get()))
+        {
+            Dy_Release(o);
+            throw_exception();
+        }
+
+    assign(o, true);
+}
+
+Dict::Dict() :
+    Object(DyDict_New(), true)
+{}
+
 
 // [[ SubscriptionRef ]]
 SubscriptionRef::SubscriptionRef(DyObject *container, DyObject *key) :

@@ -28,7 +28,7 @@ int _main()
     QString hello("Hello Qt!");
     puts(Dy::Object(hello));
 
-    Dy::Object o = Dy::dict({{"derp", "dum"}, {"dimp", 4}, {"dumb", false}});
+    Dy::Dict o{{"derp", "dum"}, {"dimp", 4}, {"dumb", false}};
     QVariantHash vh = o;
     puts(Dy::Object(vh).str());
 
