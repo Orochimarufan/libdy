@@ -78,8 +78,13 @@ int _main(void)
 
     puts("--------------------------------");
 
+    puts("+++ Dict iter +++");
     for (auto it = dict.iter(); *it; ++it)
-        Dy_Print(it.key());
+        printf("%s = %s\n", it.key().str().c_str(), (const char*)it.value().str().c_str());
+
+    puts("+++ List iter +++");
+    for (auto it : (Dy::List)dict2[1])
+        Dy_Print(it);
 
     return 0;
 }

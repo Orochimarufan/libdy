@@ -73,6 +73,12 @@ inline DyObject *Object::get() const
     return d;
 }
 
+// Comparison
+inline bool Object::is(const Object &other) const
+{
+    return d == other.d;
+}
+
 // -----------------------------------------------------------------------------
 // List
 inline void List::append(const Object &o)
@@ -85,6 +91,12 @@ inline void List::insert(std::size_t at, const Object &o)
 {
     if (!DyList_Insert(d, at, o.get()))
         throw_exception();
+}
+
+inline void List::extend(const List &other)
+{
+    for (auto it : other)
+        append(it);
 }
 
 template <typename First, typename... More>
@@ -114,6 +126,37 @@ inline void List::clear()
 {
     if (!DyList_Clear(d))
         throw_exception();
+}
+
+// Iterator
+inline List::Iterator::Iterator(const List &lst, std::size_t i) :
+    lst(lst), i(i)
+{}
+
+inline Object List::Iterator::operator *() const
+{
+    return lst[i];
+}
+
+inline List::Iterator &List::Iterator::operator ++()
+{
+    ++i;
+    return *this;
+}
+
+inline bool List::Iterator::operator !=(const List::Iterator &other) const
+{
+    return !lst.is(other.lst) || i != other.i;
+}
+
+inline List::Iterator List::begin() const
+{
+    return List::Iterator(*this, 0);
+}
+
+inline List::Iterator List::end() const
+{
+    return List::Iterator(*this, length());
 }
 
 // -----------------------------------------------------------------------------
@@ -170,7 +213,7 @@ inline Dict::Iterator Dict::iter()
 // -----------------------------------------------------------------------------
 // SubscriptionRef
 template <typename T>
-inline SubscriptionRef Object::operator[] (T key)
+inline SubscriptionRef Object::operator[] (T key) const
 {
     return SubscriptionRef(d, ::Dy_Pass(conv::from_value(key)));
 }

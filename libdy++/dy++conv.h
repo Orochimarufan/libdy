@@ -59,6 +59,14 @@ struct convert<int> {
 };
 
 template <>
+struct convert<unsigned> {
+    static inline DyObject *from_value(unsigned number)
+    {
+        return DyLong_New(number);
+    }
+};
+
+template <>
 struct convert<long> {
     static inline DyObject *from_value(long number)
     {
@@ -70,6 +78,14 @@ struct convert<long> {
             throw_exception("dy.TypeError.CXXConversionError", "Could not convert to long");
 
         return DyLong_Get(o);
+    }
+};
+
+template <>
+struct convert<unsigned long> {
+    static inline DyObject *from_value(unsigned long number)
+    {
+        return DyLong_New(number);
     }
 };
 

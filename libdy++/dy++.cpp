@@ -95,7 +95,7 @@ DyObjectType Object::type() const
     return Dy_Type(d);
 }
 
-const char *Object::type_name() const
+const char *Object::typeName() const
 {
     return ::Dy_GetTypeName(type());
 }
@@ -137,12 +137,12 @@ DyHash Object::hash()
 }
 
 // Subscription
-SubscriptionRef Object::operator[] (const Object &key)
+SubscriptionRef Object::operator[] (const Object &key) const
 {
     return SubscriptionRef(d, key.get());
 }
 
-SubscriptionRef Object::operator[] (::DyObject *key)
+SubscriptionRef Object::operator[] (::DyObject *key) const
 {
     return SubscriptionRef(d, key);
 }
@@ -180,6 +180,11 @@ SUBTYPE_TYPECHECK(String, DY_STRING)
 String::String(const char *c_str, std::size_t len) :
     Object(DyString_FromStringAndSize(c_str, len), true)
 {}
+
+const char *String::c_str()
+{
+    return DyString_AsString(d);
+}
 
 // List
 SUBTYPE_CONSTRUCTORS(List)

@@ -93,9 +93,25 @@ public:
 
     // Type
     DyObjectType type() const;
-    const char *type_name() const;
+    const char *typeName() const;
 
     // Comparison
+    /**
+     * @brief Check if two Objects have the same identity
+     * @param other The other object
+     * @note Use the operators if you want to check for data equality
+     */
+    inline bool is(const Object &other) const;
+
+    /**
+     * @brief Check if two Objects are equal
+     * @param other The other object
+     * @note Equal means they contain the same data, in contrast to having
+     *       the same identity
+     * @sa is()
+     * @warning This may or may not be implemented for all data types. At the very
+     *          least, any two objects with the same identity are also equal.
+     */
     bool operator==(const Object &) const;
     bool operator!=(const Object &) const;
 
@@ -112,20 +128,49 @@ public:
     /**
      * @brief Subscribe to an object
      * @param key The member key
+     * @return a SubscriptionRef of the item
+     * @sa getItem()
      */
-    SubscriptionRef operator[] (const Object &key);
-    SubscriptionRef operator[] (DyObject *key);
+    SubscriptionRef operator[] (const Object &key) const;
+    SubscriptionRef operator[] (DyObject *key) const;
 
     template <typename T>
-    SubscriptionRef operator[] (T);
+    SubscriptionRef operator[] (T) const;
+
+    /**
+     * @brief Get a member item
+     * @param key The member key
+     * @param defval The default
+     * @return The item
+     * @sa operator[]
+     * @note Contrary to operator[], this will NOT return a SubscriptionRef.
+     *       It also won't throw an exception if the key is not found.
+     *       Instead, the specified default value is returned
+     */
+    Object getItem(const Object &key, const Object &defval) const;
+
+    /**
+     * @brief Get a member item
+     * @param key The member key
+     * @return The item
+     * Overload of getItem(key, defval) where defval is Undefined
+     */
+    Object getItem(const Object &key) const;
 
     // Conversion
     template <typename T>
     operator T () const;
 
+    /**
+     * @brief Get the raw DyObject pointer
+     * @return The DyObject pointer
+     */
     inline DyObject *get() const;
 
     // Calling
+    /**
+     * @brief Call the object
+     */
     inline Object operator()();
 
     template <typename Arg>
@@ -137,6 +182,10 @@ public:
 
 // -----------------------------------------------------------------------------
 // Type-specific subclasses
+/**
+ * @class String
+ * @brief Class wrapping a libdy string
+ */
 class String : public Object
 {
     static void typecheck(DyObject *);
@@ -151,8 +200,20 @@ public:
      * @brief Create a String object
      */
     String(const char *c_str, std::size_t len);
+
+    /**
+     * @brief Get the 0-terminated bytestring pointer
+     * @return The c-string pointer
+     */
+    const char *c_str();
+
+    inline bool operator==(const Object &other) const;
 };
 
+/**
+ * @class List
+ * @brief Class wrapping a libdy list
+ */
 class List : public Object
 {
     static void typecheck(DyObject *);
@@ -210,9 +271,40 @@ public:
     inline void insert(std::size_t at, const Object &o);
 
     /**
+     * @brief
+     */
+    inline void extend(const List &other);
+
+    /**
      * @brief Remove all items from the list
      */
     inline void clear();
+
+    // Iterator (STL-compatible)
+    class Iterator;
+    typedef Iterator iterator;
+
+    inline Iterator begin() const;
+    inline Iterator end() const;
+};
+
+/**
+ * @class Iterator
+ * @brief STL-compatible iterator over a libdy list
+ */
+class List::Iterator
+{
+    List lst;
+    std::size_t i;
+
+public:
+    inline Iterator(const List &lst, std::size_t i=0);
+
+    inline Object operator*() const;
+
+    inline Iterator & operator++();
+
+    inline bool operator!=(const Iterator &other) const;
 };
 
 class Dict : public Object
@@ -242,32 +334,39 @@ public:
      */
     inline void clear();
 
-    class Iterator
-    {
-    public:
-        struct Pair {
-            DyObject *key;
-            DyObject *value;
-        };
-
-    private:
-        Pair **iter;
-
-    public:
-        inline Iterator(const Dict &dct);
-
-        inline Pair *operator *();
-
-        inline Object key();
-        inline Object value();
-
-        inline bool next();
-        inline Iterator &operator++();
-
-        inline ~Iterator();
-    };
+    // Iterator
+    class Iterator; // TODO: make it STL compatible (i.e. implement end())
 
     inline Iterator iter();
+};
+
+/**
+ * @class Iterator
+ * @brief Iterator over a libdy dictionary
+ */
+class Dict::Iterator
+{
+public:
+    struct Pair {
+        DyObject *key;
+        DyObject *value;
+    };
+
+private:
+    Pair **iter;
+
+public:
+    inline Iterator(const Dict &dct);
+
+    inline Pair *operator *();
+
+    inline Object key();
+    inline Object value();
+
+    inline bool next();
+    inline Iterator &operator++();
+
+    inline ~Iterator();
 };
 
 // -----------------------------------------------------------------------------
