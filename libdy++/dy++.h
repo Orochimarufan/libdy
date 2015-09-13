@@ -387,6 +387,25 @@ public:
     inline bool operator !=(const Iterator &other);
 };
 
+class Userdata : public Object
+{
+    static void typecheck(DyObject *);
+
+public:
+    // Construction
+    Userdata(DyObject *object, bool steal=false);
+    Userdata(const Object &object);
+    //Userdata(Object &&object);
+
+    Userdata(void *ptr);
+    Userdata(void *ptr, const char *name);
+
+    void setDestructor(void(*fn)(void*));
+
+    void *data() const;
+    const char *name() const;
+};
+
 // -----------------------------------------------------------------------------
 // Special classes
 /**

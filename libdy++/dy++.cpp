@@ -20,6 +20,7 @@
 #include "dy++conv.h"
 
 #include <libdy/dy.h>
+#include <libdy/userdata.h>
 
 #include <initializer_list>
 
@@ -173,7 +174,8 @@ DyObject *detail::RGetItemLong(DyObject *self, long i)
 stname::stname(DyObject *obj, bool steal) \
     : Object(obj, steal) \
 { \
-    typecheck(obj); \
+    try { typecheck(obj); } \
+    catch (...) { if (steal) Dy_Release(obj); } \
 } \
 stname::stname(const Object &obj) \
     : Object(obj) \
@@ -293,6 +295,44 @@ Dict::Iterator::~Iterator()
 {
     if (iter)
         DyDict_IterFree(reinterpret_cast<DyDict_IterPair**>(iter));
+}
+
+// Userdata
+SUBTYPE_CONSTRUCTORS(Userdata)
+SUBTYPE_TYPECHECK(Userdata, DY_USERDATA)
+
+Userdata::Userdata(void *ptr)
+{
+    DyObject *o = DyUser_Create(ptr);
+    if (!o)
+        throw_exception();
+
+    assign(o, true);
+}
+
+Userdata::Userdata(void *ptr, const char *name)
+{
+    DyObject *o = DyUser_CreateNamed(ptr, name);
+    if (!o)
+        throw_exception();
+
+    assign(o, true);
+}
+
+void Userdata::setDestructor(void(*fn)(void*))
+{
+    if (!DyUser_SetDestructor(d, fn))
+        throw_exception();
+}
+
+void *Userdata::data() const
+{
+    return DyUser_GetData(d);
+}
+
+const char *Userdata::name() const
+{
+    return DyUser_GetName(d);
 }
 
 // -----------------------------------------------------------------------------

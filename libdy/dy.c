@@ -298,8 +298,17 @@ dy_buildstring_t *bsrepr(dy_buildstring_t *bs, DyObject *self)
     case DY_LIST:
     	return list_bsrepr(bs, (DyListObject *)self);
     case DY_USERDATA:
-    	return bs_printf(bs, "<Userdata at 0x%p (%x)>",
-            ((DyUserdataObject*)self)->call_fn || ((DyUserdataObject*)self)->data,
+        nbs = dy_buildstring_append(bs, "<Userdata ", 10);
+        if (!nbs)
+        {
+            DyErr_SetMemoryError();
+            return_null;
+        }
+        if (((DyUserdataObject*)self)->name)
+            nbs = bs_printf(bs, "'%s' ", ((DyUserdataObject*)self)->name);
+        return bs_printf(bs, "[%p:%p] (%02x)>",
+            ((DyUserdataObject*)self)->data,
+            ((DyUserdataObject*)self)->call_fn,
             ((DyUserdataObject*)self)->flags
         );
     case DY_EXCEPTION:

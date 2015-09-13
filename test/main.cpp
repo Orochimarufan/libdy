@@ -51,6 +51,8 @@ void test_exceptions()
     Dy::throw_exception("test.CXXTestException", "Thrown from userdata function");
 }
 
+static int ival = 3;
+
 int _main(void)
 {
     Dy::String str("Hello, World");
@@ -96,6 +98,10 @@ int _main(void)
 
     puts("--------------------------------");
     pcall(dict["throw"]);
+
+    Dy::Userdata ud(&ival, "Ival pointer");
+    Dy_Print(ud);
+    Dy_Print(ud.data() == &ival);
 
     return 0;
 }
