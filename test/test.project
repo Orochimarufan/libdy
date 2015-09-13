@@ -25,6 +25,7 @@
     <File Name="test_json.c"/>
     <File Name="test_jsonfile.c"/>
     <File Name="test_qt.cpp"/>
+    <File Name="test_support.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="meta">
     <File Name="wscript"/>

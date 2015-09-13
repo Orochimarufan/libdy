@@ -159,6 +159,8 @@ LIBDY_API DyObject *Dy_GetItemLong(DyObject *self, long key);
  * @param key The key to look up
  * @param def A fallback value
  * @return A borrowed reference to the object || \c def
+ * @warning These methods can still throw exceptions (return NULL) if wrong
+ *          arguments are passed in!
  */
 LIBDY_API DyObject *Dy_GetItemD(DyObject *self, DyObject *key, DyObject *def);
 LIBDY_API DyObject *Dy_GetItemStringD(DyObject *self, const char *key, DyObject *def);
@@ -169,6 +171,8 @@ LIBDY_API DyObject *Dy_GetItemLongD(DyObject *self, long key, DyObject *def);
  * @param self The subscriptable object
  * @param key The key to look up
  * @return A borrowed reference to the object || Dy_Undefined
+ * @warning These methods can still throw exceptions (return NULL) if wrong
+ *          arguments are passed in!
  */
 LIBDY_API DyObject *Dy_GetItemU(DyObject *self, DyObject *key);
 LIBDY_API DyObject *Dy_GetItemStringU(DyObject *self, const char *key);

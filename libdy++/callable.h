@@ -19,9 +19,11 @@
 #pragma once
 
 #include "dy++.h"
-#include "dy++conv.h"
 
+#include <libdy/constants.h>
+#include <libdy/object.h>
 #include <libdy/userdata.h>
+#include <libdy/exceptions.h>
 
 #include <functional>
 #include <tuple>
@@ -101,29 +103,14 @@ struct fnx {
     template <std::size_t i>
     static inline NthArgType<i> get_arg(DyObject *args)
     {
-        DyObject *a = Dy_GetItemLong(args, i);
-        if (!a)
-            throw_exception();
-        return make_argument<NthArgType<i>>(Dy_Pass(a));
+        return make_argument<NthArgType<i>>(Dy_Pass(detail::RGetItemLong(args, i)));
     }
 
     template <std::size_t i>
     static inline NthArgType<i> get_arg_o(DyObject *args)
     {
-        DyObject *a = Dy_GetItemLong(args, i);
-        if (!a)
-            throw_exception();
-        return make_argument<NthArgType<i + 1>>(Dy_Pass(a));
+        return make_argument<NthArgType<i + 1>>(Dy_Pass(detail::RGetItemLong(args, i)));
     }
-
-    /*template <class X=Return, typename std::enable_if<!std::is_void<X>::value, int>::type = 0, std::size_t... I>
-    static DyObject *simple_call(DyObject *, function *fn, DyObject *args)
-    {
-        DyObject *res = (*fn)(get_arg<I>(args)...);
-        if (!res)
-            return NULL;
-        return Dy::conv::from_value_or_ref(res); // FIXME: don't Dy_Retain DyObject*s
-    }*/
 
     // Helper macros
 #define MAKE(n) \
@@ -135,41 +122,58 @@ struct fnx {
     template <std::size_t... I> \
     static DyObject *call ##n(DyObject *self, function *fn, DyObject *args)
 
+#define PROTECT(what) \
+    try \
+    { \
+        what \
+    } \
+    catch (Dy::Exception &e) \
+    { \
+        return nullptr; \
+    }
+
+#define PROTECT_RETURN(what) PROTECT( \
+    auto it = what; \
+    if (DyErr_Occurred()) \
+        return nullptr; \
+    else \
+        return make_return<Return>(it); \
+    )
+
+#define PROTECT_VOID(what) PROTECT(what;) \
+    if (DyErr_Occurred()) \
+        return nullptr; \
+    else \
+        return Dy_Retain(Dy_None);
+
     // Void, no self
     MAKE(vs)
     {
-        (*fn)(get_arg<I>(args)...);
-        return Dy_Retain(Dy_None);
+        PROTECT_VOID((*fn)(get_arg<I>(args)...))
     }
 
     MAKE(s)
     {
-        Return result = (*fn)(get_arg<I>(args)...);
-        if (DyErr_Occurred())
-            return nullptr;
-        else
-            return make_return<Return>(result);
+        PROTECT_RETURN((*fn)(get_arg<I>(args)...))
     }
 
     MAKE(vo)
     {
         if (!self)
             self = Dy_Undefined;
-        (*fn)(self, get_arg_o<I>(args)...);
-        return Dy_Retain(Dy_None);
+        PROTECT_VOID((*fn)(self, get_arg_o<I>(args)...))
     }
 
     MAKE(o)
     {
         if (!self)
             self = Dy_Undefined;
-        Return result = (*fn)(self, get_arg_o<I>(args)...);
-        if (DyErr_Occurred())
-            return nullptr;
-        else
-            return make_return<Return>(result);
+        PROTECT_RETURN((*fn)(self, get_arg_o<I>(args)...))
     }
 #undef MAKE
+#undef PROTECT_RETURN
+#undef PROTECT_VOID
+#undef PROTECT
 };
 
 template <typename... A>

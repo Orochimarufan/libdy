@@ -20,18 +20,14 @@
 
 #include "util.h"
 
-#include <libdy/dy.h>
+#include <libdy/constants.h>
+#include <libdy/numbers.h>
+#include <libdy/dystring.h>
 
 #include <string>
 
 namespace Dy {
 namespace conv {
-
-template <typename T>
-struct convert {
-    //static DyObject *from_value(T);
-    //static T to_value(DyObject *);
-};
 
 // ===================================================================
 // Simple values
@@ -128,38 +124,6 @@ struct convert<std::string> {
         return DyString_FromStringAndSize(str.c_str(), str.size());
     }
 };
-
-// ===================================================================
-// Shortcut methods
-template <typename T>
-inline DyObject *from_value(const T &val)
-{
-    return convert<T>::from_value(val);
-}
-
-template <typename T>
-inline T to_value(DyObject *obj)
-{
-    return convert<T>::to_value(obj);
-}
-
-// ===================================================================
-// From Value or Reference
-template <typename T>
-inline DyObject *from_value_or_ref(T value)
-{
-    return from_value(value);
-}
-
-inline DyObject *from_value_or_ref(DyObject *o)
-{
-    return Dy_Retain(o);
-}
-
-inline DyObject *from_value_or_ref(const Object &o)
-{
-    return Dy_Retain(o.get());
-}
 
 }
 }

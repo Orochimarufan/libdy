@@ -17,8 +17,9 @@
  */
 
 #include "dy++.h"
+#include "dy++conv.h"
 
-#include <libdy/exceptions.h>
+#include <libdy/dy.h>
 
 #include <initializer_list>
 
@@ -31,6 +32,8 @@
 
 namespace Dy {
 
+// [[ Object ]]
+// Error checking & reference counting
 inline void Object::check(::DyObject *o)
 {
     if (!o)
@@ -52,7 +55,6 @@ void Object::assign(::DyObject *o, bool steal)
     d = o;
 }
 
-// [[ Object ]]
 // Creation
 Object::Object(DyObject *object, bool steal) :
     d(0)
@@ -147,6 +149,25 @@ SubscriptionRef Object::operator[] (::DyObject *key) const
     return SubscriptionRef(d, key);
 }
 
+Object Object::getItem(const Object &key) const
+{
+    return {Dy_GetItemU(d, key.d), false};
+}
+
+Object Object::getItem(const Object &key, const Object &defval) const
+{
+    return {Dy_GetItemD(d, key.d, defval.d), false};
+}
+
+DyObject *detail::RGetItemLong(DyObject *self, long i)
+{
+    DyObject *res = Dy_GetItemLong(self, i);
+    if (!res)
+        throw_exception();
+    return res;
+}
+
+
 // Subtypes --------------------------------------------------------------------
 #define SUBTYPE_CONSTRUCTORS(stname) \
 stname::stname(DyObject *obj, bool steal) \
@@ -206,6 +227,24 @@ List::List(std::size_t prealloc) :
     Object(DyList_NewEx(prealloc), true)
 {}
 
+void List::append(const Object &o)
+{
+    if (!DyList_Append(d, o.get()))
+        throw_exception();
+}
+
+void List::insert(std::size_t at, const Object &o)
+{
+    if (!DyList_Insert(d, at, o.get()))
+        throw_exception();
+}
+
+void List::clear()
+{
+    if (!DyList_Clear(d))
+        throw_exception();
+}
+
 // Dict
 SUBTYPE_CONSTRUCTORS(Dict)
 SUBTYPE_TYPECHECK(Dict, DY_DICT)
@@ -232,7 +271,31 @@ Dict::Dict() :
     Object(DyDict_New(), true)
 {}
 
+void Dict::clear()
+{
+    if (!DyDict_Clear(d))
+        throw_exception();
+}
 
+Dict::Iterator::Iterator(const Dict &dct) :
+    iter(reinterpret_cast<Dict::Iterator::Pair**>(DyDict_Iter(dct.get())))
+{
+    if (!iter)
+        throw_exception();
+}
+
+bool Dict::Iterator::next()
+{
+    return DyDict_IterNext(reinterpret_cast<DyDict_IterPair**>(iter));
+}
+
+Dict::Iterator::~Iterator()
+{
+    if (iter)
+        DyDict_IterFree(reinterpret_cast<DyDict_IterPair**>(iter));
+}
+
+// -----------------------------------------------------------------------------
 // [[ SubscriptionRef ]]
 SubscriptionRef::SubscriptionRef(DyObject *container, DyObject *key) :
     Object(Dy_GetItemU(container, key)),
@@ -281,6 +344,34 @@ SubscriptionRef &SubscriptionRef::operator =(Object &&object)
     return *this;
 }
 
+// -----------------------------------------------------------------------------
+// [[ Calling ]]
+Object detail::Call(Object &callable, DyObject *self, const List &args)
+{
+    return {DyCallable_Call(callable.get(), self, args.get()), true};
+}
+
+Object Object::operator()()
+{
+    return {DyCallable_Call0(d, nullptr), true};
+}
+
+Object Object::operator()(const Object &arg)
+{
+    return {DyCallable_Call1(d, nullptr, arg.d), true};
+}
+
+Object SubscriptionRef::operator()()
+{
+    return {DyCallable_Call0(d, nullptr), true};
+}
+
+Object SubscriptionRef::operator()(const Object &arg)
+{
+    return {DyCallable_Call1(d, nullptr, arg.d), true};
+}
+
+// -----------------------------------------------------------------------------
 // [[ Exception ]]
 Exception::Exception(DyObject *exception) :
     d(Dy_Retain(exception))
@@ -307,7 +398,12 @@ const char *Exception::message() const
     return DyErr_Message(d);
 }
 
-DyObject *Exception::cause() const
+bool Exception::hasCause() const
+{
+    return DyErr_Cause(d);
+}
+
+Exception Exception::cause() const
 {
     return DyErr_Cause(d);
 }
@@ -323,6 +419,7 @@ void Exception::clear()
     	DyErr_Clear();
 }
 
+// -----------------------------------------------------------------------------
 // Error
 void throw_exception()
 {
@@ -360,6 +457,7 @@ void format_exception(const char *errid, const char *format, ...)
     throw Exception(e);
 }
 
+// -----------------------------------------------------------------------------
 // Constants
 const Object Undefined(Dy_Undefined);
 const Object None(Dy_None);

@@ -464,6 +464,82 @@ DyObject *Dy_GetItemU(DyObject *self, DyObject *key)
     }
 }
 
+DyObject *Dy_GetItemLongU(DyObject *self, long key)
+{
+    switch (self->type)
+    {
+    case DY_DICT:
+    {
+    	DyObject *k = DyLong_New(key);
+        if (!k)
+            return_null;
+
+    	DyObject *r = dict_getitem((DyDictObject *)self, k);
+
+    	Dy_Release(k);
+
+    	return r;
+    }
+    case DY_LIST:
+    	return list_getitemu((DyListObject *)self, key);
+    default:
+    	TE__notsubscriptable(self);
+    	return_null;
+    }
+}
+
+DyObject *Dy_GetItemStringU(DyObject *self, const char *key)
+{
+    switch (self->type)
+    {
+    case DY_DICT:
+    {
+    	DyObject *k = DyString_InternStringFromString(key);
+        if (!k)
+            return_null;
+
+    	DyObject *r = dict_getitemu((DyDictObject *)self, k);
+
+    	Dy_Release(k);
+
+    	return r;
+    }
+    case DY_LIST:
+    	TE__listindex(Dy_GetTypeName(DY_STRING));
+    	return_null;
+    default:
+    	TE__notsubscriptable(self);
+    	return_null;
+    }
+}
+
+DyObject *Dy_GetItemD(DyObject *self, DyObject *key, DyObject *def)
+{
+    DyObject *res = Dy_GetItemU(self, key);
+    if (res == Dy_Undefined)
+        return def;
+    else
+        return res;
+}
+
+DyObject *Dy_GetItemLongD(DyObject *self, long key, DyObject *def)
+{
+    DyObject *res = Dy_GetItemLongU(self, key);
+    if (res == Dy_Undefined)
+        return def;
+    else
+        return res;
+}
+
+DyObject *Dy_GetItemStringD(DyObject *self, const char *key, DyObject *def)
+{
+    DyObject *res = Dy_GetItemStringU(self, key);
+    if (res == Dy_Undefined)
+        return def;
+    else
+        return res;
+}
+
 bool Dy_SetItem(DyObject *self, DyObject *key, DyObject *value)
 {
     switch (self->type)

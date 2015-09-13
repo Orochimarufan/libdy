@@ -18,8 +18,12 @@
 
 #pragma once
 
-#include "util.h"
 #include "dy++.h"
+#include "dy++conv.h"
+
+#include <libdy/constants.h>
+#include <libdy/dystring.h>
+#include <libdy/collections.h>
 
 #include <QtCore/QString>
 #include <QtCore/QList>
@@ -29,6 +33,8 @@
 
 namespace Dy {
 namespace conv {
+
+using safe_dy_ptr = util::safe_ptr<DyObject, Dy_Release>;
 
 template <>
 struct convert<QString> {
@@ -49,13 +55,13 @@ template <typename Seq>
 struct convert_generic_sequence {
     static inline DyObject *from_value(const Seq &l)
     {
-        Dy::util::safe_dy_ptr lst = DyList_NewEx(l.size());
+        safe_dy_ptr lst = DyList_NewEx(l.size());
         if(!lst)
             throw_exception();
 
         for (const typename Seq::value_type &i : l)
         {
-            Dy::util::safe_dy_ptr obj = convert<typename Seq::value_type>::from_value(i);
+            safe_dy_ptr obj = convert<typename Seq::value_type>::from_value(i);
             if (!obj)
                 throw_exception();
 
@@ -108,18 +114,18 @@ template <typename Mapping>
 struct convert_generic_mapping {
     static inline DyObject *from_value(const Mapping &m)
     {
-        Dy::util::safe_dy_ptr dct = DyDict_New();
+        safe_dy_ptr dct = DyDict_New();
         if (!dct)
             throw_exception();
 
         typename Mapping::const_iterator it;
         for (it=m.constBegin(); it != m.constEnd(); ++it)
         {
-            Dy::util::safe_dy_ptr k = convert<typename Mapping::key_type>::from_value(it.key());
+            safe_dy_ptr k = convert<typename Mapping::key_type>::from_value(it.key());
             if (!k)
                 throw_exception();
 
-            Dy::util::safe_dy_ptr v = convert<typename Mapping::mapped_type>::from_value(it.value());
+            safe_dy_ptr v = convert<typename Mapping::mapped_type>::from_value(it.value());
             if (!v)
                 throw_exception();
 
@@ -134,7 +140,7 @@ struct convert_generic_mapping {
         if (!DyDict_Check(obj))
             format_exception(LIBDY_ERROR_CXX_TYPE_ERROR, "Cannot convert Dy::%s to Mapping", Dy_GetTypeName(Dy_Type(obj)));
 
-        Dy::util::safe_ptr<DyDict_IterPair*, DyDict_IterFree> iter = DyDict_Iter(obj);
+        util::safe_ptr<DyDict_IterPair*, DyDict_IterFree> iter = DyDict_Iter(obj);
 
         if (!iter)
             throw_exception();

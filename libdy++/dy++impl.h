@@ -16,42 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#pragma once // File included from dy++.h
 
-#include <libdy/object.h> // TODO: keep the C symbols separate?
-#include <libdy/collections.h>
-#include "dy++conv.h" // TODO: maybe make this opt-in?
-
-#include <type_traits>
-
-// Included from dypp.h
-
+//#include "dy++conv.h"
 
 namespace Dy {
 
-namespace util {
-    using safe_dy_ptr = safe_ptr<DyObject, Dy_Release>;
+namespace detail {
+    Object Call(Object &, DyObject *, const List &);
+    DyObject *RGetItemLong(DyObject *, long);
 }
 
 // -----------------------------------------------------------------------------
 // Object
 
 // Call operator
-inline Object Object::operator()()
-{
-    return Object(DyCallable_Call0(get(), NULL), true);
-}
-
-template <typename Arg>
-inline Object Object::operator()(Arg arg)
-{
-    return Object(DyCallable_Call1(get(), NULL, Object(arg).get()), true);
-}
-
 template <typename... Args>
 inline Object Object::operator()(Args... args)
 {
-    return Object(Dy_Call(get(), NULL, List::make(args...).get()), true);
+    return detail::Call(*this, nullptr, List::make(args...));
 }
 
 // Constructor
@@ -79,20 +62,15 @@ inline bool Object::is(const Object &other) const
     return d == other.d;
 }
 
+// Subscription
+template <typename T>
+inline SubscriptionRef Object::operator [](T key) const
+{
+    return this->operator[](conv::from_value(key));
+}
+
 // -----------------------------------------------------------------------------
 // List
-inline void List::append(const Object &o)
-{
-    if (!DyList_Append(d, o.get()))
-        throw_exception();
-}
-
-inline void List::insert(std::size_t at, const Object &o)
-{
-    if (!DyList_Insert(d, at, o.get()))
-        throw_exception();
-}
-
 inline void List::extend(const List &other)
 {
     for (auto it : other)
@@ -120,12 +98,6 @@ inline List List::make(Args... args)
     list.appendMany(args...);
 
     return list;
-}
-
-inline void List::clear()
-{
-    if (!DyList_Clear(d))
-        throw_exception();
 }
 
 // Iterator
@@ -161,48 +133,50 @@ inline List::Iterator List::end() const
 
 // -----------------------------------------------------------------------------
 // Dict
-inline void Dict::clear()
-{
-    if (!DyDict_Clear(d))
-        throw_exception();
-}
-
-inline Dict::Iterator::Iterator(const Dict &dct) :
-    iter(reinterpret_cast<Dict::Iterator::Pair**>(DyDict_Iter(dct.get())))
-{
-    if (!iter)
-        throw_exception();
-}
-
-inline Dict::Iterator::Pair *Dict::Iterator::operator *()
-{
-    return *iter;
-}
-
 inline Object Dict::Iterator::key()
 {
-    return (*iter)->key;
+    return (*iter)->pkey;
 }
 
 inline Object Dict::Iterator::value()
 {
-    return (*iter)->value;
+    return (*iter)->pvalue;
 }
 
-inline bool Dict::Iterator::next()
+inline bool Dict::Iterator::valid()
 {
-    return DyDict_IterNext(reinterpret_cast<DyDict_IterPair**>(iter));
+    return iter && *iter;
 }
 
-inline Dict::Iterator &Dict::Iterator::operator++()
+inline Object Dict::Iterator::Pair::key()
 {
-    DyDict_IterNext(reinterpret_cast<DyDict_IterPair**>(iter));
+    return Object(pkey);
+}
+
+inline Object Dict::Iterator::Pair::value()
+{
+    return Object(pvalue);
+}
+
+inline const Dict::Iterator::Pair &Dict::Iterator::operator *()
+{
+    return **iter;
+}
+
+Dict::Iterator::Iterator() :
+    iter(nullptr)
+{}
+
+Dict::Iterator &Dict::Iterator::operator++()
+{
+    next();
     return *this;
 }
 
-inline Dict::Iterator::~Iterator()
+bool Dict::Iterator::operator !=(const Dict::Iterator &other)
 {
-    DyDict_IterFree(reinterpret_cast<DyDict_IterPair**>(iter));
+    // HAX: basically, if the validity or the pointed-to Pair differs.
+    return !!iter ? (!!other.iter ? *iter != *other.iter : !!*iter) : !!other.iter && !!*other.iter;
 }
 
 inline Dict::Iterator Dict::iter()
@@ -210,38 +184,30 @@ inline Dict::Iterator Dict::iter()
     return Dict::Iterator(*this);
 }
 
+inline Dict::Iterator Dict::begin()
+{
+    return Dict::Iterator(*this);
+}
+
+inline Dict::Iterator Dict::end()
+{
+    return Dict::Iterator();
+}
+
 // -----------------------------------------------------------------------------
 // SubscriptionRef
-template <typename T>
-inline SubscriptionRef Object::operator[] (T key) const
-{
-    return SubscriptionRef(d, ::Dy_Pass(conv::from_value(key)));
-}
-
-template <typename T>
-SubscriptionRef &SubscriptionRef::operator =(T value)
-{
-    assign(conv::from_value(value), true);
-    Dy_SetItem(container, key, d);
-    return *this;
-}
-
 // Call operator (with self)
-inline Object SubscriptionRef::operator()()
-{
-    return Object(DyCallable_Call0(get(), container), true);
-}
-
-template <typename Arg>
-inline Object SubscriptionRef::operator()(Arg arg)
-{
-    return Object(DyCallable_Call1(get(), container, Object(arg).get()), true);
-}
-
 template <typename... Args>
 inline Object SubscriptionRef::operator()(Args... args)
 {
-    return Object(Dy_Call(get(), container, List::make(args...).get()), true);
+    return detail::Call(*this, container, List::make(args...));
+}
+
+// -----------------------------------------------------------------------------
+// Exception
+inline DyObject *Exception::get() const
+{
+    return d;
 }
 
 }

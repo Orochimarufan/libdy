@@ -135,7 +135,7 @@ public:
     SubscriptionRef operator[] (DyObject *key) const;
 
     template <typename T>
-    SubscriptionRef operator[] (T) const;
+    inline SubscriptionRef operator[] (T key) const;
 
     /**
      * @brief Get a member item
@@ -171,10 +171,8 @@ public:
     /**
      * @brief Call the object
      */
-    inline Object operator()();
-
-    template <typename Arg>
-    inline Object operator()(Arg);
+    Object operator()();
+    Object operator()(const Object &);
 
     template <typename... Args>
     inline Object operator()(Args...);
@@ -207,7 +205,7 @@ public:
      */
     const char *c_str();
 
-    inline bool operator==(const Object &other) const;
+    bool operator==(const Object &other) const;
 };
 
 /**
@@ -252,7 +250,7 @@ public:
      * @brief Append an object to the list
      * @param o The object
      */
-    inline void append(const Object &o);
+    void append(const Object &o);
 
     /**
      * @brief Append all items to the list
@@ -268,7 +266,7 @@ public:
      * @param at The position to insert at
      * @param o The Object
      */
-    inline void insert(std::size_t at, const Object &o);
+    void insert(std::size_t at, const Object &o);
 
     /**
      * @brief
@@ -278,7 +276,7 @@ public:
     /**
      * @brief Remove all items from the list
      */
-    inline void clear();
+    void clear();
 
     // Iterator (STL-compatible)
     class Iterator;
@@ -307,6 +305,10 @@ public:
     inline bool operator!=(const Iterator &other) const;
 };
 
+/**
+ * @class Dict
+ * @brief  Class wrapping a libdy dictionary
+ */
 class Dict : public Object
 {
     static void typecheck(DyObject *);
@@ -332,41 +334,57 @@ public:
     /**
      * @brief Remove all entries from the dictionary
      */
-    inline void clear();
+    void clear();
 
     // Iterator
-    class Iterator; // TODO: make it STL compatible (i.e. implement end())
+    class Iterator;
 
     inline Iterator iter();
+
+    // STL iterator
+    typedef Iterator iterator;
+
+    inline Iterator begin();
+    inline Iterator end();
 };
 
 /**
  * @class Iterator
- * @brief Iterator over a libdy dictionary
+ * @brief STL-compatible iterator over a libdy dictionary
+ * @warning most methods don't check if the iterator is valid(). DO NOT try to
+ *          use methods other than valid() and op!= on invalid iterators!
  */
 class Dict::Iterator
 {
 public:
     struct Pair {
-        DyObject *key;
-        DyObject *value;
+        DyObject *pkey;
+        DyObject *pvalue;
+
+        inline Object key();
+        inline Object value();
     };
 
 private:
     Pair **iter;
 
-public:
-    inline Iterator(const Dict &dct);
+    Iterator();
+    friend Iterator Dict::end();
 
-    inline Pair *operator *();
+public:
+    Iterator(const Dict &dct);
+    ~Iterator();
 
     inline Object key();
     inline Object value();
 
-    inline bool next();
-    inline Iterator &operator++();
+    bool next();
+    inline bool valid();
 
-    inline ~Iterator();
+    // STL compatibility
+    inline const Pair &operator *();
+    inline Iterator &operator++();
+    inline bool operator !=(const Iterator &other);
 };
 
 // -----------------------------------------------------------------------------
@@ -398,14 +416,10 @@ public:
     SubscriptionRef &operator =(const Object &object);
     SubscriptionRef &operator =(Object &&object);
 
-    template <typename T>
-    SubscriptionRef &operator =(T value);
-
     // Calling
-    inline Object operator()();
+    Object operator()();
 
-    template <typename Arg>
-    inline Object operator()(Arg);
+    Object operator()(const Object &arg);
 
     template <typename... Args>
     inline Object operator()(Args...);
@@ -429,8 +443,13 @@ public:
 
     const char *errid() const;
     const char *message() const;
-    DyObject *cause() const;
+
+    bool hasCause() const;
+    Exception cause() const;
+
     void *data() const;
+
+    DyObject *get() const;
 
     void clear();
 };

@@ -30,6 +30,28 @@ namespace Dy {
 [[ noreturn ]] void throw_exception(const char *errid, const char *message);
 [[ noreturn ]] void format_exception(const char *errid, const char *format, ...);
 
+namespace conv {
+
+template <typename T>
+struct convert {
+    //static DyObject *from_value(T);
+    //static T to_value(DyObject *);
+};
+
+template <typename T>
+inline DyObject *from_value(const T &val)
+{
+    return convert<T>::from_value(val);
+}
+
+template <typename T>
+inline T to_value(DyObject *obj)
+{
+    return convert<T>::to_value(obj);
+}
+
+}
+
 namespace util {
 
 /**

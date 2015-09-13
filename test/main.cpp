@@ -16,13 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "test_support.hpp"
+
+#include <libdy++/dy++.h>
+#include <libdy++/dy++conv.h>
+#include <libdy++/callable.h>
+
 #include <cstdio>
 #include <iostream>
 #include <functional>
-
-#include <libdy++/dy++.h>
-#include <libdy++/callable.h>
-#include <libdy/userdata.h>
 
 void Dy_Print(const Dy::Object &o)
 {
@@ -44,6 +46,11 @@ const char *rtest()
     return "hello world";
 }
 
+void test_exceptions()
+{
+    Dy::throw_exception("test.CXXTestException", "Thrown from userdata function");
+}
+
 int _main(void)
 {
     Dy::String str("Hello, World");
@@ -54,6 +61,7 @@ int _main(void)
         {"hello", Dy::function(::hello)},
         {"method", Dy::method(::test_method)},
         {"return", Dy::function(::rtest)},
+        {"throw", Dy::function(::test_exceptions)},
         {"text", "Yo!"},
     };
 
@@ -79,31 +87,20 @@ int _main(void)
     puts("--------------------------------");
 
     puts("+++ Dict iter +++");
-    for (auto it = dict.iter(); *it; ++it)
-        printf("%s = %s\n", it.key().str().c_str(), (const char*)it.value().str().c_str());
+    for (auto it : dict)
+        printf("%s = %s\n", it.key().str().c_str(), it.value().str().c_str());
 
     puts("+++ List iter +++");
     for (auto it : (Dy::List)dict2[1])
         Dy_Print(it);
+
+    puts("--------------------------------");
+    pcall(dict["throw"]);
 
     return 0;
 }
 
 int main(void)
 {
-    try {
-        return _main();
-    }
-    catch (Dy::Exception &e)
-    {
-        std::cerr << e.errid() << ": " << e.what() << std::endl;
-        DyObject *cause = e.cause();
-        while(cause)
-        {
-            std::cerr << "Caused by: " << DyErr_ErrId(cause) << ": " << DyErr_Message(cause) << std::endl;
-            cause = DyErr_Cause(cause);
-        }
-        e.clear();
-        return 1;
-    }
+    return pcall(_main) ? 1 : 0;
 }

@@ -16,28 +16,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "test_support.hpp"
+#pragma once
 
 #include <libdy++/dy++.h>
-#include <libdy++/dy++qt.h>
 
-#include <cstdio>
 #include <iostream>
 
-
-int _main()
+inline void print_exception(Dy::Exception e)
 {
-    QString hello("Hello Qt!");
-    puts(Dy::Object(hello));
-
-    Dy::Dict o{{"derp", "dum"}, {"dimp", 4}, {"dumb", false}};
-    QVariantHash vh = o;
-    puts(Dy::Object(vh).str());
-
-    return 0;
+    std::cerr << e.errid() << ": " << e.message() << std::endl;
+    while(e.hasCause())
+    {
+        e = e.cause();
+        std::cerr << ">> Caused by: " << e.errid() << ": " << e.message() << std::endl;
+    }
 }
 
-int main(void)
+template <typename Fn, typename... Args>
+inline bool pcall(Fn f, Args... args)
 {
-    return pcall(_main) ? 1 : 0;
+    try {
+        f(args...);
+    }
+    catch (Dy::Exception &e)
+    {
+        std::cerr << "pcall() caught Exception: ";
+        print_exception(e);
+        e.clear();
+        return true;
+    }
+    return false;
 }
