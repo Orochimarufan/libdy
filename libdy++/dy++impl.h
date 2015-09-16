@@ -163,17 +163,17 @@ inline const Dict::Iterator::Pair &Dict::Iterator::operator *()
     return **iter;
 }
 
-Dict::Iterator::Iterator() :
+inline Dict::Iterator::Iterator() :
     iter(nullptr)
 {}
 
-Dict::Iterator &Dict::Iterator::operator++()
+inline Dict::Iterator &Dict::Iterator::operator++()
 {
     next();
     return *this;
 }
 
-bool Dict::Iterator::operator !=(const Dict::Iterator &other)
+inline bool Dict::Iterator::operator !=(const Dict::Iterator &other)
 {
     // HAX: basically, if the validity or the pointed-to Pair differs.
     return !!iter ? (!!other.iter ? *iter != *other.iter : !!*iter) : !!other.iter && !!*other.iter;
