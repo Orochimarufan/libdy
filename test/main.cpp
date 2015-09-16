@@ -107,6 +107,13 @@ int _main(void)
     Dy::String s2 = std::move(str);
     assert(str == Dy::Undefined);
 
+    // This is a case extracted from real-life that tests implicit conversions between Object and the subclasses:
+    // The important part is that the conversion constructor on the subclasses must be preferred
+    // over the template conversion operator on Object
+    Dy::Dict stuff{{"hey", Dy::List{}}};
+    Dy::List heys;
+    heys.extend(stuff["hey"]); // This line will not compile if the preference is messed up.
+
     return 0;
 }
 

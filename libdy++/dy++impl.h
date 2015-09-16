@@ -45,7 +45,7 @@ Object::Object(T value) :
     assign(conv::from_value(value));
 }
 
-template <typename T>
+template <typename T, typename>
 inline Object::operator T () const
 {
     return conv::to_value<T>(d);

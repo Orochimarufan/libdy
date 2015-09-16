@@ -158,7 +158,8 @@ public:
     Object getItem(const Object &key) const;
 
     // Conversion
-    template <typename T>
+    template <typename T,
+        typename = typename std::enable_if<!std::is_base_of<Object, T>::value>::type>
     operator T () const;
 
     /**
