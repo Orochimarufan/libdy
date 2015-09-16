@@ -23,6 +23,7 @@
 #include <libdy/userdata.h>
 
 #include <initializer_list>
+#include <utility>
 
 #ifdef __LIBDYPP_TRAP
 #include <csignal>
@@ -180,14 +181,13 @@ stname::stname(DyObject *obj, bool steal) \
 stname::stname(const Object &obj) \
     : Object(obj) \
 { \
-    typecheck(obj.get()); \
-}
-/*stname::stname(Object &&obj) \
+    typecheck(d); \
+} \
+stname::stname(Object &&obj) \
+    : Object(std::forward<Object>(obj)) \
 { \
-    typecheck(obj.get()); \
-    assign(obj.get(), true); \
-    obj.d = Dy_Retain(Dy_Undefined); \
-}*/
+    typecheck(d); \
+}
 
 #define SUBTYPE_TYPECHECK(stname, want_type) \
 void stname::typecheck(DyObject *obj) \

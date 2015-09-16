@@ -192,7 +192,7 @@ public:
     // Construction
     String(DyObject *object, bool steal=false);
     String(const Object &object);
-    //String(Object &&object);
+    String(Object &&object);
 
     /**
      * @brief Create a String object
@@ -204,8 +204,6 @@ public:
      * @return The c-string pointer
      */
     const char *c_str();
-
-    bool operator==(const Object &other) const;
 };
 
 /**
@@ -220,7 +218,7 @@ public:
     // Construction
     List(DyObject *object, bool steal=false);
     List(const Object &object);
-    //List(Object &&object);
+    List(Object &&object);
 
     // Initializer-construction
     /**
@@ -317,7 +315,7 @@ public:
     // Construction
     Dict(DyObject *object, bool steal=false);
     Dict(const Object &object);
-    //Dict(Object &&object);
+    Dict(Object &&object);
 
     /**
      * @brief Create a new dictionary
@@ -395,7 +393,7 @@ public:
     // Construction
     Userdata(DyObject *object, bool steal=false);
     Userdata(const Object &object);
-    //Userdata(Object &&object);
+    Userdata(Object &&object);
 
     Userdata(void *ptr);
     Userdata(void *ptr, const char *name);

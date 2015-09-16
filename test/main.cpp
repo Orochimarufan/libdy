@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <iostream>
 #include <functional>
+#include <cassert>
 
 void Dy_Print(const Dy::Object &o)
 {
@@ -102,6 +103,9 @@ int _main(void)
     Dy::Userdata ud(&ival, "Ival pointer");
     Dy_Print(ud);
     Dy_Print(ud.data() == &ival);
+
+    Dy::String s2 = std::move(str);
+    assert(str == Dy::Undefined);
 
     return 0;
 }
