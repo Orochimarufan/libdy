@@ -60,16 +60,10 @@ def options(opt):
     opt.load("compiler_c")
     opt.load("doxygen")
 
-    opt.add_option("-D", "--no-docs", action="store_true",
-        help="Don't build the Doxygen documentation")
-
 
 def configure(cnf):
     cnf.load("compiler_c")
     cnf.load("doxygen")
-
-    if cnf.options.no_docs:
-        cnf.env.NO_DOXYGEN="1"
 
     #cnf.write_config_header("config.h")
 

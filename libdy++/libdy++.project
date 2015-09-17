@@ -105,5 +105,6 @@
     <File Name="CMakeLists.txt"/>
     <File Name="libdy++ConfigVersion.cmake.in"/>
     <File Name="libdy++Config.cmake.in"/>
+    <File Name="Doxyfile"/>
   </VirtualDirectory>
 </CodeLite_Project>

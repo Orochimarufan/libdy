@@ -29,6 +29,8 @@ def options(ctx):
         help="Add debug information")
     ctx.add_option("-R", "--rpath", action="store_true",
         help="Add RPath information to built code")
+    ctx.add_option("-D", "--no-docs", action="store_true",
+        help="Don't build the Doxygen documentation")
 
     for project in projects:
         ctx.recurse(project)
@@ -52,6 +54,9 @@ def configure(ctx):
         ctx.end_msg("yes")
     else:
         ctx.end_msg("no")
+
+    if ctx.options.no_docs:
+        ctx.env.NO_DOXYGEN="1"
 
     ctx.find_program("git", var="GIT", mandatory=False)
     
