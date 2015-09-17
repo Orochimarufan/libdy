@@ -77,15 +77,15 @@ inline void List::extend(const List &other)
         append(it);
 }
 
-template <typename First, typename... More>
-inline void List::appendMany(First arg, More... args)
+template <typename Item, typename... More>
+inline void List::appendMany(Item arg, More... args)
 {
     append(arg);
     appendAll(args...);
 }
 
-template <typename First>
-inline void List::appendMany(First arg)
+template <typename Item>
+inline void List::appendMany(Item arg)
 {
     append(arg);
 }

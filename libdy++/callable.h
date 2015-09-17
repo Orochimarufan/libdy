@@ -30,8 +30,17 @@
 #include <utility>
 #include <type_traits>
 
+
+/**
+ * @file callable.h
+ * @brief Support code for creating callable libdy userdata objects from C++ functions
+ */
+
+
 namespace Dy {
 namespace Callable {
+
+/// @cond
 
 // Type conversions
 template <typename T>
@@ -232,19 +241,39 @@ using get_signature = typename get_signature_impl<T>::type;
 
 // TODO: use the above to support lambdas (overload mkfunction and mkmethod)
 
+/// @endcond
 
 } // namespace Callable
 
+/**
+ * @brief Create a callable libdy userdata
+ * @ingroup Callables
+ * @param fn The callable C++ thing
+ * @return A callable Userdata
+ */
 template <typename T>
-Object function(T fn)
+Userdata function(T fn)
 {
-    return Object(Callable::mkfunction(fn), true);
+    return {Callable::mkfunction(fn), true};
 }
 
+/**
+ * @brief Create a callable libdy userdata
+ * @ingroup Callables
+ * @param fn The callable C++ thing
+ * @return  A callable Userdata
+ * @sa function()
+ * @note The C++ callable will take an Object as first argument, corresponding
+ *       to the container the callable was retrieved from.
+ * @note Unfortunately, there's no way to make sure methods are only called
+ *       as methods (i.e. with the self argument) and not also as plain functions
+ *       that are preemtively retrieved from their container. In such cases,
+ *       the first argument will be Undefined
+ */
 template <typename T>
-Object method(T fn)
+Userdata method(T fn)
 {
-    return Object(Callable::mkmethod(fn), true);
+    return {Callable::mkmethod(fn), true};
 }
 
 }

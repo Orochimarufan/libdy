@@ -31,11 +31,24 @@
 #include <QtCore/QHash>
 #include <QtCore/QVariant>
 
+/**
+ * @file dy++qt.h
+ * @ingroup Conversion
+ * @brief Built-in conversions for Qt types
+ * @sa dy++conv.h
+ * @note This includes much of the C libdy API
+ */
+
 namespace Dy {
 namespace conv {
 
+/**
+ * @brief A auto-release pointer to a DyObject
+ * Has less overhead than Dy::Object
+ */
 using safe_dy_ptr = util::safe_ptr<DyObject, Dy_Release>;
 
+/// @brief conversion for QString
 template <>
 struct convert<QString> {
     static inline DyObject *from_value(const QString &str)
@@ -51,6 +64,7 @@ struct convert<QString> {
     }
 };
 
+/// @brief Generic conversion template for sequences
 template <typename Seq>
 struct convert_generic_sequence {
     static inline DyObject *from_value(const Seq &l)
@@ -86,6 +100,7 @@ struct convert_generic_sequence {
     }
 };
 
+/// @brief Conversion for any QList
 template <typename T>
 struct convert<QList<T>> {
     static inline DyObject *from_value(const QList<T> &val)
@@ -98,6 +113,7 @@ struct convert<QList<T>> {
     }
 };
 
+/// @brief Conversion for QStringList
 template <>
 struct convert<QStringList> {
     static inline DyObject *from_value(const QStringList &val)
@@ -110,6 +126,7 @@ struct convert<QStringList> {
     }
 };
 
+/// @brief Generic conversion template for mappings
 template <typename Mapping>
 struct convert_generic_mapping {
     static inline DyObject *from_value(const Mapping &m)
@@ -159,6 +176,7 @@ struct convert_generic_mapping {
     }
 };
 
+/// @brief Conversion for any QHash
 template <typename Key, typename T>
 struct convert<QHash<Key, T>> {
     static inline DyObject *from_value(const QHash<Key, T> &val)
@@ -171,6 +189,7 @@ struct convert<QHash<Key, T>> {
     }
 };
 
+/// @brief Conversion for QVariant
 template <>
 struct convert<QVariant> {
     static inline DyObject *from_value(const QVariant &v)

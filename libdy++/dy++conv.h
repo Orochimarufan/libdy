@@ -26,12 +26,22 @@
 
 #include <string>
 
+
+/**
+ * @file dy++conv.h
+ * @ingroup Conversion
+ * @brief Built-in conversions for C++ types
+ * @sa dy++qt.h
+ * @note This includes much of the C libdy API
+ */
+
 namespace Dy {
 namespace conv {
 
 // ===================================================================
 // Simple values
 
+/// @brief conversion for bool
 template <>
 struct convert<bool> {
     static inline DyObject *from_value(const bool &val)
@@ -46,6 +56,7 @@ struct convert<bool> {
     }
 };
 
+/// @brief conversion from int
 template <>
 struct convert<int> {
     static inline DyObject *from_value(int val)
@@ -54,6 +65,7 @@ struct convert<int> {
     }
 };
 
+/// @brief conversion from unsigned int
 template <>
 struct convert<unsigned> {
     static inline DyObject *from_value(unsigned number)
@@ -62,6 +74,7 @@ struct convert<unsigned> {
     }
 };
 
+/// @brief conversion for long
 template <>
 struct convert<long> {
     static inline DyObject *from_value(long number)
@@ -77,6 +90,9 @@ struct convert<long> {
     }
 };
 
+/// @brief conversion from unsigned long
+/// @warning This may incur data loss
+/// @todo possibly remove this because of the data loss
 template <>
 struct convert<unsigned long> {
     static inline DyObject *from_value(unsigned long number)
@@ -85,6 +101,7 @@ struct convert<unsigned long> {
     }
 };
 
+/// @brief conversion for double
 template <>
 struct convert<double> {
     static inline DyObject *from_value(double floating)
@@ -100,6 +117,7 @@ struct convert<double> {
     }
 };
 
+/// @brief conversion for const char * (C strings)
 template <>
 struct convert<const char *> {
     static inline DyObject *from_value(const char *str)
@@ -117,6 +135,7 @@ struct convert<const char *> {
     }
 };
 
+/// @brief conversion from std::string
 template <>
 struct convert<std::string> {
     static inline DyObject *from_value(const std::string &str)

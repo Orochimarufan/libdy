@@ -143,12 +143,12 @@ DyHash Object::hash()
 // Subscription
 SubscriptionRef Object::operator[] (const Object &key) const
 {
-    return SubscriptionRef(d, key.get());
+    return {d, key.get()};
 }
 
 SubscriptionRef Object::operator[] (::DyObject *key) const
 {
-    return SubscriptionRef(d, key);
+    return {d, key};
 }
 
 Object Object::getItem(const Object &key) const
@@ -359,13 +359,13 @@ void SubscriptionRef::del()
 }
 
 // Assign
-SubscriptionRef &SubscriptionRef::operator =(DyObject *object)
+/*SubscriptionRef &SubscriptionRef::operator =(DyObject *object)
 {
     assign(object);
     if (!Dy_SetItem(container, key, object))
         throw_exception();
     return *this;
-}
+}*/
 
 SubscriptionRef &SubscriptionRef::operator =(const Object &object)
 {
